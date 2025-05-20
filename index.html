@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-dark"> <!-- Default theme class -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Coding Agent Pro - DevUI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="ai-sidebar" id="aiSidebar">
+            <header class="sidebar-header panel-header">
+                <h2>AI Assistant</h2>
+            </header>
+            <div class="sidebar-content">
+                <div class="config-item">
+                    <label for="apiKeyInput">Gemini API Key (Overrides .env)</label>
+                    <div class="input-with-button">
+                        <input type="password" id="apiKeyInput" placeholder="Enter API Key (or leave blank for .env)">
+                        <button id="setApiKeyButton" title="Set/Apply API Key" class="icon-button">✓</button>
+                    </div>
+                </div>
+                <div class="config-item">
+                    <label for="modelNameSelect">Model Name</label>
+                    <select id="modelNameSelect" disabled>
+                        <option value="">Initializing or API Key needed...</option>
+                    </select>
+                    <input type="text" id="modelNameInputFallback" value="gemini-1.5-flash-latest" placeholder="Or type model name here" style="display:none; margin-top: 5px; font-size: 0.8em;">
+                </div>
+                <div class="config-item">
+                    <label for="themeSelect">Theme</label>
+                    <select id="themeSelect">
+                        <option value="theme-dark">Dark (Default)</option>
+                        <option value="theme-light">Light</option>
+                        <option value="theme-cosmic-dark">Cosmic Dark</option>
+                        <option value="theme-spooky">Spooky</option>
+                        <option value="theme-rainbow">Rainbow</option>
+                    </select>
+                </div>
+                <div id="chatArea">
+                    <!-- Initial message removed -->
+                </div>
+            </div>
+            <footer class="sidebar-footer">
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Type your message...">
+                    <button id="sendChatButton" title="Send Message" class="icon-button primary">➤</button>
+                </div>
+            </footer>
+        </aside>
+
+        <div class="resizer resizer-horizontal" id="resizerAiMain"></div>
+
+        <div class="main-content-wrapper" id="mainContentWrapper">
+            <header class="main-top-bar panel-header">
+                <div class="main-tabs panel-tabs">
+                    <button data-pane="codePane">Code</button>
+                    <button data-pane="diffPane">Diff</button>
+                    <button data-pane="previewPane">Preview</button>
+                </div>
+                <div class="main-actions">
+                    <button id="toggleMainTerminalBtn" title="Toggle Terminal">Toggle Terminal</button>
+                    <button title="Sync & Export" id="fileChangesButton">File Changes</button>
+                    <button title="Close" class="close-button icon-button">✕</button>
+                </div>
+            </header>
+
+            <main class="editor-pane-content" id="editorPaneContent">
+                <!-- Code Pane Container -->
+                <div class="content-pane" id="codePane">
+                    <!-- Content injected by code_pane.js -->
+                </div>
+
+                <!-- Diff Pane Container -->
+                <div class="content-pane" id="diffPane">
+                    <header class="panel-header diff-header">
+                        <div class="diff-file-info">
+                            <span class="icon-button" style="font-size: 1.1em;">📄</span>
+                            <span id="diffFilePathHeader" title="No file selected">No file selected</span>
+                        </div>
+                        <div class="diff-status-actions">
+                            <span id="diffStatusTextHeader" class="diff-status no-changes">No Changes</span>
+                            <button class="icon-button" title="File Actions">•••</button>
+                        </div>
+                    </header>
+                    <div class="pane-content-area" id="diffPaneContentArea">
+                        <!-- Content injected by diff_pane.js -->
+                    </div>
+                </div>
+
+                <!-- Preview Pane Container -->
+                <div class="content-pane" id="previewPane">
+                    <header class="panel-header preview-header">
+                        <div class="preview-nav-controls">
+                            <button class="icon-button" title="Back" id="previewBtnBack">‹</button>
+                            <button class="icon-button" title="Forward" id="previewBtnForward">›</button>
+                            <button class="icon-button" title="Refresh" id="previewBtnRefresh">🔄</button>
+                        </div>
+                        <input type="text" value="/" placeholder="Preview URL (e.g., http://localhost:8080)" class="preview-url-input" id="previewUrlInputHeader">
+                        <div class="preview-actions">
+                             <button class="icon-button" title="Open in new tab" id="previewBtnOpenNewTab">↗️</button>
+                             <button class="icon-button" title="Toggle device toolbar">📱</button>
+                             <button class="icon-button" title="More options">⋮</button>
+                        </div>
+                    </header>
+                    <div class="pane-content-area preview-content-area" id="previewPaneContentArea">
+                        <!-- Content injected by preview_pane.js -->
+                    </div>
+                </div>
+            </main>
+
+            <aside class="terminal-pane" id="terminalPane">
+                 <header class="terminal-tabs-bar panel-header">
+                    <div class="panel-tabs">
+                        <button>Bolt Terminal</button>
+                        <button>Terminal</button>
+                    </div>
+                    <button class="icon-button" title="New Terminal Tab">+</button>
+                 </header>
+                <div id="terminal" class="terminal-content"></div>
+            </aside>
+        </div>
+    </div>
+
+    <footer class="status-bar">
+        <span>main*</span>
+        <span>UTF-8</span>
+        <span>LF</span>
+        <span>Spaces: 2</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/ai_message_renderer.js') }}"></script> <!-- Add this script tag -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/code_pane.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/diff_pane.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/preview_pane.js') }}"></script>
+</body>
+</html>
