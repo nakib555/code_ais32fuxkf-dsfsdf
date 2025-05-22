@@ -1,0 +1,10 @@
+/* --- START OF FILE 16_panel_status_bar.css --- */
+/* Status Bar */
+.status-bar {
+    background-color: var(--bg-surface); color: var(--text-secondary);
+    border-top: 1px solid var(--border-color-strong); padding: calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*2);
+    font-size: 0.75rem; display: flex; gap: calc(var(--spacing-unit)*2); height: calc(var(--spacing-unit)*3);
+    align-items: center; flex-shrink: 0;
+}
+.status-bar span:first-child { color: var(--text-primary); font-weight: 500; }
+/*

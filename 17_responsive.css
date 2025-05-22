@@ -1,0 +1,58 @@
+/* --- START OF FILE 17_responsive.css --- */
+/* --- Responsiveness --- */
+@media (max-width: 1024px) {
+    :root { --sidebar-initial-width: 280px; --file-explorer-initial-width: 240px; }
+    .ai-sidebar { min-width: 200px; }
+    .file-explorer-wrapper { min-width: 180px; }
+    body { font-size: 0.8125rem; }
+    .main-top-bar { padding-left: var(--spacing-unit); padding-right: var(--spacing-unit); }
+    .panel-tabs button, .panel-tabs .file-tab { padding: 0 var(--spacing-unit); }
+    .main-actions button { max-width: 130px; }
+    .preview-url-input { min-width: 150px; }
+    #diffFilePathHeader { max-width: 300px; }
+}
+@media (max-width: 768px) {
+    .resizer-horizontal { display: none !important; }
+    #codePane { flex-direction: column !important; }
+    #codePane > .file-explorer-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color-strong) !important;
+        height: 40vh !important;
+        min-height: 150px !important;
+        flex-grow: 0 !important;
+        flex-shrink: 0 !important;
+    }
+    #codePane > .code-editor-area-wrapper {
+        width: 100% !important;
+        flex-grow: 1 !important;
+        height: auto !important;
+    }
+
+
+    .ai-sidebar { width: var(--sidebar-initial-width); min-width: 0; max-width: 100%; border-right: 1px solid var(--border-color-strong); }
+    .main-top-bar {
+        padding-left: var(--spacing-unit); padding-right: var(--spacing-unit); gap: var(--spacing-unit);
+        height: auto; min-height: var(--header-height); flex-wrap: wrap;
+    }
+    .main-top-bar .panel-tabs { margin-left: 0; padding: calc(var(--spacing-unit) * 0.5); }
+
+    .main-tabs, .main-actions { flex-basis: 100%; justify-content: flex-start; margin-bottom: var(--spacing-unit); } /* .main-tabs is not explicitly defined, but might be an implied container for .panel-tabs */
+    .main-actions { margin-bottom: 0; justify-content: flex-end; }
+    .panel-tabs button, .panel-tabs .file-tab, .main-actions button { font-size: 0.8125rem; }
+    .main-actions button { max-width: 120px; }
+    .preview-header { flex-wrap: wrap; height: auto; min-height: var(--header-height); }
+    .preview-url-input { flex-basis: 100%; margin: var(--spacing-unit) 0; }
+    #diffFilePathHeader { max-width: 200px; }
+}
+@media (max-width: 600px) {
+    .app-container { flex-direction: column; }
+    .ai-sidebar { width: 100%; max-width: 100%; height: 45vh; min-height: 250px; border-right: none; border-bottom: 1px solid var(--border-color-strong); }
+    .main-content-wrapper { flex-grow: 1; height: 55vh; }
+    .terminal-pane { height: 200px; }
+    .main-tabs, .main-actions { justify-content: center; } /* .main-tabs is not explicitly defined */
+    #codePane > .file-explorer-wrapper { height: 35vh !important; }
+    #diffFilePathHeader { max-width: 150px; }
+}
+/*

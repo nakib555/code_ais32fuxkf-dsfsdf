@@ -1,0 +1,249 @@
+/* --- START OF FILE 09_panel_ai_markdown.css --- */
+/* --- AI Message Markdown & Custom Block Styling --- */
+.ai-message h1, .ai-message h2, .ai-message h3, .ai-message h4, .ai-message h5, .ai-message h6 {
+    color: var(--text-headings); margin-top: var(--spacing-unit);
+    margin-bottom: calc(var(--spacing-unit)*0.75); line-height: 1.3;
+}
+.ai-message h1 { font-size: 1.25em; } .ai-message h2 { font-size: 1.1em; } .ai-message h3 { font-size: 1em; font-weight: 600; }
+.ai-message p { margin-bottom: var(--spacing-unit); }
+.ai-message ul, .ai-message ol { margin-left: calc(var(--spacing-unit)*2.5); margin-bottom: var(--spacing-unit); padding-left: var(--spacing-unit); }
+.ai-message li { margin-bottom: calc(var(--spacing-unit)*0.5); }
+.ai-message blockquote {
+    border-left: 4px solid var(--accent-primary); margin-left: 0;
+    padding-left: var(--spacing-unit); color: var(--text-secondary);
+    font-style: italic; margin-bottom: var(--spacing-unit);
+}
+.ai-message > code, .ai-message p > code, .ai-message li > code { /* Inline code */
+    background-color: var(--bg-inset); padding: 0.2em 0.4em;
+    border-radius: var(--radius-sm); font-family: var(--font-code);
+    font-size: 0.85em; color: var(--accent-secondary);
+    border: 1px solid var(--border-color-soft);
+}
+
+/* Container for AI code blocks (Markdown ` blocks) */
+.ai-message .ai-code-block-container {
+    background-color: var(--bg-inset); /* Or a slightly darker inset */
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--radius-md);
+    margin: var(--spacing-unit) 0; /* Space above and below */
+    overflow: hidden; /* Contains the pre and footer */
+    display: flex; /* Use flex column for pre and footer */
+    flex-direction: column;
+}
+
+/* Pre element inside the new container */
+.ai-message .ai-code-block-container pre {
+    margin: 0 !important; /* Remove default margin */
+    border: none !important; /* Remove default border */
+    border-radius: 0 !important; /* Remove border-radius */
+    padding: var(--spacing-unit) !important; /* Keep padding inside pre */
+    background-color: transparent !important; /* Inherit container background */
+    flex-grow: 1; /* Allow pre to take available space */
+    overflow: auto; /* Keep scrollbar for long lines */
+}
+
+/* Code element inside the new container */
+.ai-message .ai-code-block-container pre code {
+    background-color: transparent !important; /* Inherit */
+    padding: 0 !important; /* Remove padding */
+    border: none !important; /* Remove border */
+    border-radius: 0 !important; /* Remove border-radius */
+    white-space: pre !important; /* Ensure preformatting */
+}
+
+/* Line numbers inside the new container */
+.ai-message .ai-code-block-container pre.line-numbers {
+    padding-left: 3.8em !important; /* Keep space for line numbers */
+}
+.ai-message .ai-code-block-container .line-numbers .line-numbers-rows {
+    border-right: 1px solid var(--border-color-soft) !important;
+    background-color: var(--bg-inset) !important; /* Match container background */
+    padding-top: var(--spacing-unit) !important; /* Match pre padding-top */
+    top: 0 !important;
+    font-size: 0.75rem !important; /* Smaller line numbers */
+}
+.ai-message .ai-code-block-container .line-numbers-rows > span:before {
+    color: var(--text-secondary) !important;
+    opacity: 0.7;
+}
+
+
+/* Footer for AI code blocks */
+.ai-message .ai-code-block-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Space out left, center, right */
+    padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit);
+    background-color: color-mix(in srgb, var(--bg-inset) 80%, var(--bg-app)); /* Slightly darker than inset */
+    border-top: 1px solid var(--border-color-soft);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    flex-shrink: 0; /* Don't shrink */
+}
+
+.ai-message .ai-code-block-footer .footer-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+}
+
+.ai-message .ai-code-block-footer .footer-left button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: calc(var(--spacing-unit) * 0.25); /* Smaller padding for icons */
+    border-radius: var(--radius-sm);
+    line-height: 1;
+    font-size: 1em; /* Inherit from footer */
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+.ai-message .ai-code-block-footer .footer-left button:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-hover);
+}
+
+.ai-message .ai-code-block-footer .footer-center {
+    flex-grow: 1; /* Take up available space */
+    text-align: center;
+    font-style: italic;
+    color: color-mix(in srgb, var(--text-secondary) 80%, transparent); /* More muted */
+}
+
+.ai-message .ai-code-block-footer .footer-right {
+    flex-shrink: 0; /* Don't shrink */
+    font-family: var(--font-code);
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+
+/* Terminal command block styling */
+.ai-message .ai-terminal-command-block,
+.ai-message .ai-markdown-code-runnable-wrapper { /* Keep .ai-markdown-code-runnable-wrapper for compatibility if needed, or remove */
+    margin: var(--spacing-unit) 0;
+    padding: var(--spacing-unit); /* Keep padding for the block container */
+    background-color: var(--bg-inset);
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--radius-md);
+    /* Add flex properties to arrange pre and button */
+    display: flex;
+    flex-direction: column; /* Stack pre and button */
+    gap: var(--spacing-unit); /* Space between pre and button */
+}
+
+/* Pre inside the terminal command block */
+.ai-message .ai-terminal-command-block pre,
+.ai-message .ai-markdown-code-runnable-wrapper pre {
+    background-color: var(--bg-app) !important; /* Darker bg for command itself */
+    color: var(--text-primary) !important;
+    padding: var(--spacing-unit) !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--border-color-strong) !important;
+    font-family: var(--font-code) !important; font-size: 0.875em !important;
+    white-space: pre-wrap !important; word-break: break-all;
+    margin: 0 !important; /* Remove margin */
+    overflow-x: auto; /* Ensure horizontal scroll if needed */
+}
+
+/* Button inside the terminal command block */
+.ai-message .ai-terminal-command-block button,
+.ai-message .ai-markdown-code-runnable-wrapper button {
+    font-size: 0.8125rem;
+    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit);
+    background-color: var(--accent-secondary); border-color: var(--accent-secondary);
+    color: var(--text-on-accent);
+    /* Remove display: inline-block; if flex column is used */
+    align-self: flex-start; /* Align button to the start */
+}
+
+
+/* Task List Styling */
+.ai-message h2.ai-project-title {
+    font-size: 1.1em;
+    color: var(--text-headings);
+    margin-top: calc(var(--spacing-unit) * 0.5);
+    margin-bottom: var(--spacing-unit);
+    padding-bottom: calc(var(--spacing-unit) * 0.75);
+    border-bottom: 1px solid var(--border-color-soft);
+}
+
+.ai-message ul.ai-task-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
+}
+
+.ai-message ul.ai-task-list li.ai-task-item {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    padding: calc(var(--spacing-unit) * 0.5) 0;
+    font-size: 0.9em;
+    margin-bottom: calc(var(--spacing-unit) * 0.25);
+    line-height: 1.5;
+    flex-wrap: wrap; /* Allow content to wrap */
+    gap: calc(var(--spacing-unit) * 0.5); /* Space between items in the flex container */
+}
+
+.ai-message .ai-task-icon {
+    margin-right: calc(var(--spacing-unit) * 0.5); /* Adjust margin */
+    font-size: 1em;
+    line-height: 1.5;
+    flex-shrink: 0;
+}
+
+.ai-message .ai-task-icon.success { color: var(--accent-success); }
+.ai-message .ai-task-icon.error { color: var(--accent-error); }
+.ai-message .ai-task-icon.pending {
+    color: var(--accent-primary);
+    animation: ai-task-spinner 1.5s linear infinite;
+}
+
+.ai-message .ai-task-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.5); /* Space between description and target */
+    flex-grow: 1; /* Allow content to take space */
+}
+
+.ai-message .ai-task-description {
+    color: var(--text-primary);
+    /* margin-right: calc(var(--spacing-unit) * 0.5); */ /* Removed margin, using gap on parent */
+    font-weight: 500;
+    flex-shrink: 0; /* Don't shrink description */
+}
+
+.ai-message .ai-task-target {
+    color: var(--text-secondary);
+    font-family: var(--font-code);
+    background-color: var(--bg-inset);
+    padding: 0.1em 0.4em;
+    border-radius: var(--radius-sm);
+    font-size: 0.95em;
+    word-break: break-all;
+    flex-shrink: 1; /* Allow target to shrink */
+    min-width: 0; /* Needed for flex-shrink to work */
+}
+
+/* Style for the button added by the backend for file tasks */
+.ai-message .ai-task-item .ai-file-task-button {
+    font-size: 0.75rem; /* Smaller font size */
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1); /* Smaller padding */
+    background-color: var(--bg-surface); /* Match list item background */
+    border-color: var(--border-color-soft);
+    color: var(--text-primary);
+    flex-shrink: 0; /* Don't shrink button */
+}
+.ai-message .ai-task-item .ai-file-task-button:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--accent-primary);
+}
+
+
+@keyframes ai-task-spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+/*

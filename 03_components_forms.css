@@ -1,0 +1,30 @@
+/* --- START OF FILE 03_components_forms.css --- */
+/* --- Inputs & Selects --- */
+input[type="text"], input[type="password"], select, textarea {
+    width: 100%;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    background-color: var(--bg-inset);
+    border: 1px solid var(--border-color-soft);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+}
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23848c9a'%3E%3Cpath d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-unit) center;
+    background-size: 1.5em;
+    padding-right: calc(var(--spacing-unit) * 1.5 + 1.5em);
+}
+select[disabled] { opacity: 0.5; background-color: var(--bg-inset); }
+.input-with-button { display: flex; gap: var(--spacing-unit); align-items: center; }
+.input-with-button input { flex-grow: 1; }
+.input-with-button button { flex-shrink: 0; padding: var(--spacing-unit); }
+/*

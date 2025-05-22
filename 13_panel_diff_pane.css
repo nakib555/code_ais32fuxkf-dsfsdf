@@ -1,0 +1,129 @@
+/* --- START OF FILE 13_panel_diff_pane.css --- */
+/* Diff Pane Styles */
+.diff-header { /* .panel-header is used */
+    justify-content: space-between;
+    padding: 0 calc(var(--spacing-unit) * 1.5);
+    align-items: center;
+}
+.diff-file-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    overflow: hidden; /* For long file paths */
+}
+#diffFilePathHeader {
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px; /* Adjust as needed */
+    display: inline-block; /* For ellipsis to work */
+}
+.diff-status-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+}
+.diff-status {
+    font-size: 0.8125rem;
+    padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+.diff-status.no-changes {
+    background-color: color-mix(in srgb, var(--accent-success) 20%, transparent);
+    color: var(--accent-success);
+    border: 1px solid color-mix(in srgb, var(--accent-success) 40%, transparent);
+}
+.diff-status.has-changes { /* Example for when changes exist */
+    background-color: color-mix(in srgb, var(--accent-warning) 20%, transparent);
+    color: var(--accent-warning);
+    border: 1px solid color-mix(in srgb, var(--accent-warning) 40%, transparent);
+}
+
+.pane-content-area { /* Used by Diff and Preview Panes */
+    flex-grow: 1;
+    overflow-y: auto; /* Main scroll for the pane */
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-app);
+    padding: var(--spacing-unit);
+}
+
+.diff-placeholder {
+    display: flex; /* Initially flex, JS will control */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-secondary);
+    padding: calc(var(--spacing-unit) * 3) 0; /* Give it some space */
+    flex-shrink: 0; /* Don't shrink if content below is large */
+}
+.diff-placeholder .diff-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-unit);
+    color: var(--accent-success);
+}
+.diff-placeholder h3 {
+    color: var(--text-headings);
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+}
+
+.diff-current-content-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-unit);
+    padding-left: var(--spacing-unit); /* Align with content padding */
+}
+
+.diff-current-content-viewer {
+    flex-grow: 1; /* Allow this to take remaining space and scroll */
+    overflow: auto; /* For the pre/code block itself */
+    background-color: var(--bg-inset) !important;
+    border: 1px solid var(--border-color-soft) !important;
+    border-radius: var(--radius-md);
+    min-height: 200px; /* Ensure it's visible even with little content */
+}
+.diff-current-content-viewer pre {
+    margin: 0 !important;
+    height: 100%; /* Fill the viewer */
+    font-size: 0.8125rem !important; /* Slightly smaller for diff view */
+    background-color: var(--bg-inset) !important;
+}
+.diff-current-content-viewer pre.line-numbers {
+    padding-left: 3.8em !important; /* Consistent with main editor */
+}
+.diff-current-content-viewer .line-numbers .line-numbers-rows {
+    border-right: 1px solid var(--border-color-soft) !important;
+    background-color: var(--bg-inset) !important; /* Match pre background */
+    padding-top: var(--spacing-unit) !important;
+    top: 0 !important;
+    font-size: 0.75rem !important; /* Smaller line numbers */
+}
+.diff-current-content-viewer .line-numbers-rows > span:before {
+    color: var(--text-secondary) !important;
+    opacity: 0.7;
+}
+.diff-current-content-viewer code {
+    color: var(--text-primary);
+    white-space: pre !important; /* Ensure preformatting is respected */
+}
+
+
+#diffInternalOutput {
+    display: none; /* Hidden by default, JS will control */
+    width:100%;
+    font-family: var(--font-code);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-top: var(--spacing-unit); /* Space from placeholder or current content */
+}
+.diff-line-numbers { padding-right: var(--spacing-unit); text-align: right; color: var(--text-secondary); user-select: none;}
+.diff-lines-content span { display: block; white-space: pre; }
+.diff-context { color: var(--text-primary); }
+.diff-addition { background-color: color-mix(in srgb, var(--accent-success) 15%, transparent); color: var(--accent-success); }
+.diff-deletion { background-color: color-mix(in srgb, var(--accent-error) 15%, transparent); color: var(--accent-error); text-decoration: line-through; }
+/*

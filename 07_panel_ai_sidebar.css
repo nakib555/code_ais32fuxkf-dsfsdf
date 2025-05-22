@@ -1,0 +1,23 @@
+/* --- START OF FILE 07_panel_ai_sidebar.css --- */
+/* --- AI Assistant Sidebar --- */
+.ai-sidebar {
+    width: var(--sidebar-initial-width); min-width: 280px; max-width: 45%;
+    background-color: var(--bg-surface);
+    display: flex; flex-direction: column; overflow: hidden;
+    flex-shrink: 0; flex-grow: 0;
+    border-right: 1px solid var(--border-color-strong);
+}
+.sidebar-header { padding: 0 calc(var(--spacing-unit)*2); } /* .panel-header is used for its content */
+.sidebar-content { padding: calc(var(--spacing-unit)*2); overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: calc(var(--spacing-unit)*2); }
+.config-item label { display: block; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: var(--spacing-unit); }
+#chatArea {
+    flex-grow: 1; background-color: var(--bg-inset); border-radius: var(--radius-md);
+    padding: var(--spacing-unit); overflow-y: auto; border: 1px solid var(--border-color-soft);
+    display: flex; flex-direction: column; gap: var(--spacing-unit);
+}
+.sidebar-footer { padding: calc(var(--spacing-unit)*1.5); border-top: 1px solid var(--border-color-strong); flex-shrink: 0; }
+.chat-input-area { display: flex; gap: var(--spacing-unit); }
+#chatInput { flex-grow: 1; }
+#sendChatButton.icon-button { font-size: 1.25rem; padding: var(--spacing-unit); background-color: var(--accent-primary); color: var(--text-on-accent); border: 1px solid var(--accent-primary);}
+#sendChatButton.icon-button:hover { background-color: var(--accent-primary-hover); border-color: var(--accent-primary-hover); }
+/*

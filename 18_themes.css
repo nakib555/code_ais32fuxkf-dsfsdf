@@ -1,0 +1,161 @@
+/* --- START OF FILE 18_themes.css --- */
+/* --- THEME DEFINITIONS --- */
+html.theme-light {
+    --bg-app: #f4f6f8; --bg-surface: #ffffff; --bg-inset: #f8f9fa; --bg-hover: #e9ecef; --bg-active: #dee2e6;
+    --text-primary: #212529; --text-secondary: #6c757d; --text-headings: #111827; --text-link: #007bff;
+    --accent-primary: #007bff; --accent-primary-hover: #0069d9; --accent-primary-active: #005cbf;
+    --accent-secondary: #5856d6; --accent-success: #28a745; --accent-warning: #ffc107; --accent-error: #dc3545;
+    --border-color-strong: #d1d5db; --border-color-soft: #e5e7eb;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 2px 4px rgba(0,0,0,0.05);
+}
+html.theme-light .ai-message { border-left-color: var(--accent-secondary); }
+html.theme-light .user-message { border-right-color: var(--accent-primary-active); }
+html.theme-light .ai-message.info, html.theme-light .ai-message.thinking, html.theme-light .ai-message.error { border-left-color: var(--border-color-soft); }
+html.theme-light .ai-message.info.success { border-left-color: var(--accent-success); }
+html.theme-light .ai-message.error { border-left-color: var(--accent-error); }
+
+
+html.theme-light pre[class*="language-"] code, html.theme-light pre[class*="language-"] { color: #212529 !important; background-color: #f8f9fa !important; }
+html.theme-light .line-numbers .line-numbers-rows { background-color: #f8f9fa !important; border-right-color: #e5e7eb !important; }
+html.theme-light .line-numbers-rows > span:before { color: #888 !important; }
+html.theme-light .ai-message > code, html.theme-light .ai-message p > code, html.theme-light li > code { background-color: #e9ecef; color: #495057; border-color: #dee2e6; }
+html.theme-light .ai-message .ai-code-block-container pre { background-color: #f0f2f5 !important; } /* Ensure this specificity or adjust if needed */
+html.theme-light .ai-message .ai-code-block-container { background-color: #f8f9fa; border-color: #e5e7eb; }
+html.theme-light .ai-message .ai-code-block-container .line-numbers .line-numbers-rows { background-color: #f8f9fa !important; border-right-color: #e5e7eb !important; }
+html.theme-light .ai-message .ai-code-block-footer { background-color: #e9ecef; border-top-color: #e5e7eb; }
+html.theme-light .ai-message .ai-terminal-command-block, html.theme-light .ai-message .ai-markdown-code-runnable-wrapper { background-color: #f8f9fa; border-color: #e5e7eb; }
+html.theme-light .ai-message .ai-terminal-command-block pre { background-color: #e9ecef !important; border-color: #d1d5db !important; }
+html.theme-light .main-top-bar .panel-tabs { background-color: var(--bg-inset); }
+html.theme-light .main-top-bar .panel-tabs button { color: var(--text-secondary); }
+html.theme-light .main-top-bar .panel-tabs button:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+html.theme-light .main-top-bar .panel-tabs button.active-tab { background-color: var(--accent-secondary); color: var(--text-on-accent); }
+html.theme-light .pane-content-area { background-color: var(--bg-app); color: var(--text-secondary); }
+html.theme-light .diff-placeholder .diff-icon { color: var(--accent-success); }
+html.theme-light .diff-placeholder h3 { color: var(--text-headings); }
+html.theme-light .diff-current-content-viewer { background-color: var(--bg-inset) !important; border-color: var(--border-color-soft) !important; }
+html.theme-light .diff-current-content-viewer pre { background-color: var(--bg-inset) !important; }
+html.theme-light .diff-current-content-viewer code { color: var(--text-primary) !important; }
+html.theme-light .diff-current-content-viewer .line-numbers .line-numbers-rows { background-color: var(--bg-inset) !important; border-right-color: var(--border-color-soft) !important; }
+html.theme-light .diff-current-content-viewer .line-numbers-rows > span:before { color: var(--text-secondary) !important; }
+html.theme-light .preview-header { background-color: var(--bg-surface); }
+html.theme-light .preview-url-input { background-color: var(--bg-inset); border-color: var(--border-color-soft); color: var(--text-primary); }
+html.theme-light .preview-url-input:focus { border-color: var(--accent-primary); }
+html.theme-light .preview-header .icon-button { color: var(--text-secondary); }
+html.theme-light .preview-header .icon-button:hover { color: var(--text-primary); background-color: var(--bg-hover); }
+html.theme-light #previewInternalIframe { background-color: var(--bg-app); }
+html.theme-light .preview-placeholder { color: var(--text-secondary); }
+html.theme-light .diff-status.no-changes { background-color: color-mix(in srgb, var(--accent-success) 20%, transparent); color: var(--accent-success); border: 1px solid color-mix(in srgb, var(--accent-success) 40%, transparent); }
+html.theme-light .diff-addition { background-color: #e6ffed; color: #22863a; }
+html.theme-light .diff-deletion { background-color: #ffeef0; color: #b31d28; }
+html.theme-light .ai-message .ai-task-description { color: var(--text-primary); }
+html.theme-light .ai-message .ai-task-target { color: var(--text-secondary); background-color: var(--bg-inset); }
+html.theme-light .ai-message .ai-task-icon.success { color: var(--accent-success); }
+html.theme-light .ai-task-icon.error { color: var(--accent-error); }
+html.theme-light .ai-task-icon.pending { color: var(--accent-primary); }
+html.theme-light .ai-message h2.ai-project-title { border-bottom-color: var(--border-color-soft); }
+
+
+html.theme-cosmic-dark {
+    --bg-app: #0d0c1d; --bg-surface: #161b29; --bg-inset: #10141f; --bg-hover: #2a2f45; --bg-active: #3c4260;
+    --text-primary: #a6b0cf; --text-secondary: #707890; --text-headings: #d0d8f0; --text-link: #79a6f2;
+    --accent-primary: #79a6f2; --accent-primary-hover: #90b8ff; --accent-primary-active: #6090e0;
+    --accent-secondary: #c792ea; --accent-success: #67c9a0; --accent-warning: #ffd700; --accent-error: #ff5572;
+    --border-color-strong: #0a0916; --border-color-soft: #2f354d;
+}
+html.theme-cosmic-dark .ai-message { border-left-color: var(--accent-secondary); }
+html.theme-cosmic-dark .user-message { border-right-color: var(--accent-primary-active); }
+html.theme-cosmic-dark .ai-message.info, html.theme-cosmic-dark .ai-message.thinking, html.theme-cosmic-dark .ai-message.error { border-left-color: var(--text-secondary); }
+html.theme-cosmic-dark .ai-message.info.success { border-left-color: var(--accent-success); }
+html.theme-cosmic-dark .ai-message.error { border-left-color: var(--accent-error); }
+
+html.theme-cosmic-dark .ai-message > code, html.theme-cosmic-dark .ai-message p > code, html.theme-cosmic-dark li > code { background-color: #10141f; border-color: #2f354d;}
+html.theme-cosmic-dark .ai-message .ai-code-block-container pre { background-color: #0d0c1d !important; }
+html.theme-cosmic-dark .ai-message .ai-code-block-container { background-color: #10141f; border-color: #2f354d; }
+html.theme-cosmic-dark .ai-message .ai-code-block-container .line-numbers .line-numbers-rows { background-color: #10141f !important; border-right-color: #2f354d !important; }
+html.theme-cosmic-dark .ai-message .ai-code-block-footer { background-color: #0a0916; border-top-color: #2f354d; }
+html.theme-cosmic-dark .ai-message .ai-terminal-command-block, html.theme-cosmic-dark .ai-message .ai-markdown-code-runnable-wrapper { background-color: #10141f; border-color: #2f354d; }
+html.theme-cosmic-dark .ai-message .ai-terminal-command-block pre { background-color: #0a0916 !important; border-color: #2a2f45 !important; }
+html.theme-cosmic-dark .main-top-bar .panel-tabs { background-color: var(--bg-inset); }
+html.theme-cosmic-dark .main-top-bar .panel-tabs button { color: var(--text-secondary); }
+html.theme-cosmic-dark .main-top-bar .panel-tabs button:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+html.theme-cosmic-dark .main-top-bar .panel-tabs button.active-tab { background-color: var(--accent-secondary); color: var(--text-on-accent); }
+html.theme-cosmic-dark .pane-content-area { background-color: var(--bg-app); }
+html.theme-cosmic-dark .diff-current-content-viewer { background-color: var(--bg-inset) !important; border-color: var(--border-color-soft) !important; }
+html.theme-cosmic-dark .diff-current-content-viewer pre { background-color: var(--bg-inset) !important; }
+html.theme-cosmic-dark .diff-current-content-viewer code { color: var(--text-primary) !important; }
+html.theme-cosmic-dark .diff-current-content-viewer .line-numbers .line-numbers-rows { background-color: var(--bg-inset) !important; border-right-color: var(--border-color-soft) !important; }
+html.theme-cosmic-dark .diff-current-content-viewer .line-numbers-rows > span:before { color: var(--text-secondary) !important; }
+html.theme-cosmic-dark #previewInternalIframe { background-color: var(--bg-app); }
+html.theme-cosmic-dark .preview-placeholder { color: var(--text-secondary); }
+
+
+html.theme-spooky {
+    --bg-app: #100c08; --bg-surface: #1a140f; --bg-inset: #1f1a14; --bg-hover: #2e251b; --bg-active: #423629;
+    --text-primary: #d4be98; --text-secondary: #928374; --text-headings: #f4e8c0; --text-link: #e69875;
+    --accent-primary: #e69875; --accent-primary-hover: #f0a88a; --accent-primary-active: #d98863;
+    --accent-secondary: #d3869b; --accent-success: #a9b665; --accent-warning: #dbbc7f;
+    --accent-error: #ea6962; --border-color-strong: #000000; --border-color-soft: #3c3836;
+}
+html.theme-spooky .ai-message { border-left-color: var(--accent-secondary); }
+html.theme-spooky .user-message { border-right-color: var(--accent-primary-active); }
+html.theme-spooky .ai-message.info, html.theme-spooky .ai-message.thinking, html.theme-spooky .ai-message.error { border-left-color: var(--text-secondary); }
+html.theme-spooky .ai-message.info.success { border-left-color: var(--accent-success); }
+html.theme-spooky .ai-message.error { border-left-color: var(--accent-error); }
+
+html.theme-spooky .toastify.toastify-warning { color: #282828 !important; }
+html.theme-spooky .ai-message > code, html.theme-spooky .ai-message p > code, html.theme-spooky li > code { background-color: #1f1a14; color: var(--accent-primary); border-color: #3c3836; }
+html.theme-spooky .ai-message .ai-code-block-container pre { background-color: #100c08 !important; }
+html.theme-spooky .ai-message .ai-code-block-container { background-color: #1f1a14; border-color: #3c3836; }
+html.theme-spooky .ai-message .ai-code-block-container .line-numbers .line-numbers-rows { background-color: #1f1a14 !important; border-right-color: #3c3836 !important; }
+html.theme-spooky .ai-message .ai-code-block-footer { background-color: #100c08; border-top-color: #3c3836; }
+html.theme-spooky .ai-message .ai-terminal-command-block, html.theme-spooky .ai-message .ai-markdown-code-runnable-wrapper { background-color: #1f1a14; border-color: #3c3836; }
+html.theme-spooky .ai-message .ai-terminal-command-block pre { background-color: #100c08 !important; border-color: #2e251b !important; }
+html.theme-spooky .main-top-bar .panel-tabs { background-color: var(--bg-inset); }
+html.theme-spooky .main-top-bar .panel-tabs button { color: var(--text-secondary); }
+html.theme-spooky .main-top-bar .panel-tabs button:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+html.theme-spooky .main-top-bar .panel-tabs button.active-tab { background-color: var(--accent-secondary); color: var(--text-on-accent); }
+html.theme-spooky .pane-content-area { background-color: var(--bg-app); }
+html.theme-spooky .diff-current-content-viewer { background-color: var(--bg-inset) !important; border-color: var(--border-color-soft) !important; }
+html.theme-spooky .diff-current-content-viewer pre { background-color: var(--bg-inset) !important; }
+html.theme-spooky .diff-current-content-viewer code { color: var(--text-primary) !important; }
+html.theme-spooky .diff-current-content-viewer .line-numbers .line-numbers-rows { background-color: var(--bg-inset) !important; border-right-color: var(--border-color-soft) !important; }
+html.theme-spooky .diff-current-content-viewer .line-numbers-rows > span:before { color: var(--text-secondary) !important; }
+html.theme-spooky #previewInternalIframe { background-color: var(--bg-app); }
+html.theme-spooky .preview-placeholder { color: var(--text-secondary); }
+
+
+html.theme-rainbow {
+    --bg-app: #1a1a1a; --bg-surface: #2a2a2a; --bg-inset: #222222; --bg-hover: #383838; --bg-active: #4d4d4d;
+    --text-primary: #f0f0f0; --text-secondary: #b0b0b0; --text-headings: #ffffff; --text-link: #ff00ff;
+    --accent-primary: #ff00ff; --accent-primary-hover: #f000f0; --accent-primary-active: #e000e0;
+    --accent-secondary: #00ffff; --accent-success: #00ff00; --accent-warning: #ffff00;
+    --accent-error: #ff0000; --border-color-strong: #000000; --border-color-soft: #404040;
+}
+html.theme-rainbow .ai-message { border-left-color: var(--accent-secondary); }
+html.theme-rainbow .user-message { border-right-color: var(--accent-primary-active); }
+html.theme-rainbow .ai-message.info, html.theme-rainbow .ai-message.thinking, html.theme-rainbow .ai-message.error { border-left-color: var(--text-secondary); }
+html.theme-rainbow .ai-message.info.success { border-left-color: var(--accent-success); }
+html.theme-rainbow .ai-message.error { border-left-color: var(--accent-error); }
+
+html.theme-rainbow .toastify.toastify-warning,
+html.theme-rainbow .toastify.toastify-success { color: #111 !important; }
+html.theme-rainbow .ai-message > code, html.theme-rainbow .ai-message p > code, html.theme-rainbow li > code { background-color: #222222; color: var(--accent-secondary); border-color: #404040; }
+html.theme-rainbow .ai-message .ai-code-block-container pre { background-color: #1a1a1a !important; }
+html.theme-rainbow .ai-message .ai-code-block-container { background-color: #222222; border-color: #404040; }
+html.theme-rainbow .ai-message .ai-code-block-container .line-numbers .line-numbers-rows { background-color: #222222 !important; border-right-color: #404040 !important; }
+html.theme-rainbow .ai-message .ai-code-block-footer { background-color: #1a1a1a; border-top-color: #404040; }
+html.theme-rainbow .ai-message .ai-terminal-command-block, html.theme-rainbow .ai-message .ai-markdown-code-runnable-wrapper { background-color: #222222; border-color: #404040; }
+html.theme-rainbow .ai-message .ai-terminal-command-block pre { background-color: #1a1a1a !important; border-color: #383838 !important; }
+html.theme-rainbow .main-top-bar .panel-tabs { background-color: var(--bg-inset); }
+html.theme-rainbow .main-top-bar .panel-tabs button { color: var(--text-secondary); }
+html.theme-rainbow .main-top-bar .panel-tabs button:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+html.theme-rainbow .main-top-bar .panel-tabs button.active-tab { background-color: var(--accent-secondary); color: var(--text-on-accent); }
+html.theme-rainbow .pane-content-area { background-color: var(--bg-app); }
+html.theme-rainbow .diff-current-content-viewer { background-color: var(--bg-inset) !important; border-color: var(--border-color-soft) !important; }
+html.theme-rainbow .diff-current-content-viewer pre { background-color: var(--bg-inset) !important; }
+html.theme-rainbow .diff-current-content-viewer code { color: var(--text-primary) !important; }
+html.theme-rainbow .diff-current-content-viewer .line-numbers .line-numbers-rows { background-color: var(--bg-inset) !important; border-right-color: var(--border-color-soft) !important; }
+html.theme-rainbow .diff-current-content-viewer .line-numbers-rows > span:before { color: var(--text-secondary) !important; }
+html.theme-rainbow #previewInternalIframe { background-color: var(--bg-app); }
+html.theme-rainbow .preview-placeholder { color: var(--text-secondary); }
+/*

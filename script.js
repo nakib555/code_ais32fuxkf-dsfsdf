@@ -13,23 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeSelect = document.getElementById('themeSelect');
 
     // Terminal Elements
-    const terminalContainer = document.getElementById('terminal');
     const terminalPane = document.getElementById('terminalPane');
     const toggleMainTerminalBtn = document.getElementById('toggleMainTerminalBtn');
-    let term; // Xterm instance
-    let fitAddon; // Xterm FitAddon instance
+    const terminalTabsContainer = document.getElementById('terminalTabsContainer');
+    const terminalInstancesContainer = document.getElementById('terminalInstancesContainer');
+    const newTerminalBtn = document.querySelector('.new-terminal-btn');
 
-    // Main Layout Elements
-    const aiSidebar = document.getElementById('aiSidebar');
-    const mainContentWrapper = document.getElementById('mainContentWrapper');
-    const resizerAiMain = document.getElementById('resizerAiMain');
-
-    // Content Pane Elements
-    const editorPaneContent = document.getElementById('editorPaneContent');
-    const codePane = document.getElementById('codePane');
-    const diffPane = document.getElementById('diffPane');
-    const previewPane = document.getElementById('previewPane');
-    const contentPanes = [codePane, diffPane, previewPane].filter(p => p);
+    let terminalInstances = {}; // Store TerminalEnhancer instances { id: instance }
+    let activeTerminalId = null;
+    let nextTerminalId = 1;
 
 
     // Global State Variables
@@ -114,107 +106,40 @@ document.addEventListener('DOMContentLoaded', () => {
         ansiColorSecondary = colorStringToAnsiFg(getCssVariableValue('--text-secondary'));
     }
 
-    function getXtermThemeObjectFromCss() {
-        return {
-            background: getCssVariableValue('--bg-inset'), foreground: getCssVariableValue('--text-primary'),
-            cursor: getCssVariableValue('--accent-primary'), selectionBackground: getCssVariableValue('--bg-active'),
-            black: getCssVariableValue('--bg-surface'), red: getCssVariableValue('--accent-error'),
-            green: getCssVariableValue('--accent-success'), yellow: getCssVariableValue('--accent-warning'),
-            blue: getCssVariableValue('--accent-primary'), magenta: getCssVariableValue('--accent-secondary'),
-            cyan: '#56b6c2', white: getCssVariableValue('--text-primary'),
-            brightBlack: getCssVariableValue('--text-secondary'), brightRed: getCssVariableValue('--accent-error'),
-            brightGreen: getCssVariableValue('--accent-success'), brightYellow: getCssVariableValue('--accent-warning'),
-            brightBlue: getCssVariableValue('--accent-primary'), brightMagenta: getCssVariableValue('--accent-secondary'),
-            brightCyan: '#80d0ff', brightWhite: getCssVariableValue('--text-headings')
-        };
-    }
+    window.BoltDevUI.runTerminalCommand = async function(command) {
+        if (activeTerminalId && terminalInstances[activeTerminalId]) {
+            const activeTerminal = terminalInstances[activeTerminalId];
+            activeTerminal.appendOutput(`${activeTerminal.getPromptTextContent()}${command}\n`, 'ps-command');
 
-    if (typeof Terminal === 'undefined' || typeof FitAddon === 'undefined') {
-        console.error("script.js: Xterm.js or FitAddon is not loaded. Terminal will not function.");
-        if (terminalContainer) terminalContainer.innerHTML = "<p>Error: Terminal library not loaded.</p>";
-    } else {
-        term = new Terminal({
-            cursorBlink: true, fontSize: 13, fontFamily: 'var(--font-code)',
-            theme: getXtermThemeObjectFromCss(), rows: 10, convertEol: true, scrollback: 1000,
-        });
-        fitAddon = new FitAddon.FitAddon();
-        term.loadAddon(fitAddon);
-
-        if (terminalContainer) term.open(terminalContainer);
-        else console.error("script.js: Terminal container not found. Cannot open Xterm.js terminal.");
-
-        function fitTerminal() {
             try {
-                if (terminalPane && terminalPane.style.display !== 'none' && terminalContainer && terminalContainer.offsetWidth > 0 && terminalContainer.offsetHeight > 0 && term && term.element && term.element.offsetParent !== null) {
-                    fitAddon.fit();
-                }
-            } catch (e) { console.warn("script.js: Fit addon error during fitTerminal:", e); }
-        }
-        window.BoltDevUI.fitTerminal = fitTerminal; // Expose for other modules if needed
+                const response = await fetch('/api/run-command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: command })
+                });
+                const result = await response.json();
+                let outputText = result.output || "";
+                let errorText = result.error || "";
 
-        function writeInitialTerminalMessages() {
-            if (!term) return;
-            term.writeln('Welcome to the Bolt Terminal!');
-            term.writeln('Type commands for the project directory.');
-            const projectPrompt = `\r\n${ansiColorLink}~/project${ANSI_RESET}\r\n${ansiColorError}❯ ${ANSI_RESET}`;
-            term.write(projectPrompt);
-        }
+                if (outputText) activeTerminal.appendOutput(outputText + (outputText.endsWith('\n') ? '' : '\n'), result.return_code === 0 ? 'ps-success' : 'ps-output');
+                if (errorText && errorText !== outputText) activeTerminal.appendOutput(errorText + (errorText.endsWith('\n') ? '' : '\n'), 'ps-error');
+                if (!outputText && !errorText && result.return_code !== 0) activeTerminal.appendOutput(`Command exited with code ${result.return_code}\n`, 'ps-error');
+                
+                lastTerminalCommand = command;
+                lastTerminalOutput = outputText + (errorText ? `\nSTDERR: ${errorText}` : "");
+                terminalOutputSentToAI = false;
 
-        let currentCommand = '';
-        term.onKey(e => {
-            if (!term) return;
-            const ev = e.domEvent;
-            const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey;
-            if (ev.key === 'Enter') {
-                term.writeln('');
-                if (currentCommand.trim() !== '') runTerminalCommand(currentCommand);
-                else {
-                    const projectPrompt = `\r\n${ansiColorLink}~/project${ANSI_RESET}\r\n${ansiColorError}❯ ${ANSI_RESET}`;
-                    term.write(projectPrompt);
-                }
-                currentCommand = '';
-            } else if (ev.key === 'Backspace') {
-                if (currentCommand.length > 0) {
-                    term.write('\b \b');
-                    currentCommand = currentCommand.slice(0, -1);
-                }
-            } else if (printable && ev.key.length === 1) {
-                term.write(e.key);
-                currentCommand += e.key;
+            } catch (error) {
+                activeTerminal.appendOutput(`Client Error running command from AI: ${error.message}\n`, 'ps-error');
             }
-        });
-
-        setTimeout(() => { fitTerminal(); writeInitialTerminalMessages(); }, 250);
-    }
-
-    async function runTerminalCommand(command) {
-        if (!term) return;
-        function sanitizeForTerminal(text) { return String(text); }
-        term.writeln(`${ansiColorSecondary}${sanitizeForTerminal(command)}${ANSI_RESET}`);
-        try {
-            const response = await fetch('/api/run-command', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command: command })
-            });
-            const data = await response.json();
-            const outputToStore = data.output || (data.error ? `Error: ${data.error}` : "No output.");
-            if (data.output) term.writeln(sanitizeForTerminal(data.output));
-            if (data.error && !response.ok) term.writeln(`\r\n${ansiColorError}Server Error:${ANSI_RESET} ${sanitizeForTerminal(data.error)} (Code: ${data.return_code !== undefined ? data.return_code : 'N/A'})`);
-            else if (data.error) term.writeln(`\r\n${ansiColorWarning}App Error:${ANSI_RESET} ${sanitizeForTerminal(data.error)} (Code: ${data.return_code !== undefined ? data.return_code : 'N/A'})`);
-            else if (data.return_code !== 0 && data.return_code !== undefined) term.writeln(`\r\n${ansiColorWarning}Command exited with code: ${data.return_code}`);
-            lastTerminalCommand = command; lastTerminalOutput = outputToStore; terminalOutputSentToAI = false;
-        } catch (errorCaughtByRunCmd) {
-            term.writeln(`\r\n${ansiColorError}Client/Network error:${ANSI_RESET} ${sanitizeForTerminal(errorCaughtByRunCmd.message)}`);
-            lastTerminalCommand = command; lastTerminalOutput = `Client/Network error: ${errorCaughtByRunCmd.message}`; terminalOutputSentToAI = false;
+            activeTerminal.updatePromptDisplay();
+        } else {
+            console.error("No active terminal to run command from AI.");
+            window.showToast("No active terminal.", "error");
         }
-        const projectPrompt = `\r\n${ansiColorLink}~/project${ANSI_RESET}\r\n${ansiColorError}❯ ${ANSI_RESET}`;
-        term.write(projectPrompt);
-    }
-    // Make runTerminalCommand globally accessible for buttons in AI messages
-    window.BoltDevUI.runTerminalCommand = runTerminalCommand;
+    };
 
 
-    // MODIFIED: appendMessageToChat now accepts HTML for AI messages
     function appendMessageToChat(textOrNode, className) {
         if (!chatArea) { console.error("script.js: appendMessageToChat - chatArea not found."); return null; }
         const messageDiv = document.createElement('div');
@@ -222,35 +147,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const needsTimestamp = !className.includes('thinking');
 
         if (className.includes('ai-message') && !className.includes('thinking') && !className.includes('error') && !className.includes('info') && typeof textOrNode === 'string') {
-            // For AI messages receiving pre-rendered HTML
-            messageDiv.innerHTML = textOrNode; // Insert the pre-rendered HTML directly
+            messageDiv.innerHTML = textOrNode;
             if (needsTimestamp) {
                 const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const timestampSpan = document.createElement('span');
                 timestampSpan.classList.add('message-timestamp');
                 timestampSpan.textContent = timestamp;
-                messageDiv.appendChild(timestampSpan); // Append timestamp after HTML content
+                messageDiv.appendChild(timestampSpan);
             }
             chatArea.appendChild(messageDiv);
             chatArea.scrollTop = chatArea.scrollHeight;
 
-            // Highlight code blocks *after* they have been added to the DOM
             if (typeof Prism !== 'undefined') {
-                 // Use a slight delay to ensure elements are fully rendered before highlighting
                  setTimeout(() => {
                      Prism.highlightAllUnder(messageDiv);
-                     chatArea.scrollTop = chatArea.scrollHeight; // Scroll again after highlighting might change height
-                 }, 50); // Small delay
+                     chatArea.scrollTop = chatArea.scrollHeight;
+                 }, 50);
             } else {
                  chatArea.scrollTop = chatArea.scrollHeight;
             }
 
         } else {
-            // For user messages, info/error/thinking AI messages, or pre-rendered nodes
             if (typeof textOrNode === 'string') {
-                // Simple text or basic markdown for non-AI-response types
-                // Note: This path is mostly for system messages, user input, etc.
-                // Full AI responses should come as HTML via the first branch.
                 const linkedText = textOrNode.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--text-link); text-decoration: underline;">$1</a>');
                 messageDiv.innerHTML = linkedText;
             } else if (textOrNode instanceof Node) {
@@ -269,9 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return messageDiv;
     }
 
-    // REMOVED: finalizeAiMessageContent function is no longer needed
-
-    // Helper functions for code block footer buttons (These remain as they attach JS listeners)
     function copyCodeToClipboard(button) {
         const container = button.closest('.ai-code-block-container');
         if (!container) return;
@@ -280,10 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const codeText = codeElement.textContent;
 
         navigator.clipboard.writeText(codeText).then(() => {
-            console.log("Code copied to clipboard!");
             if (window.showToast) window.showToast("Code copied to clipboard!", "success");
         }).catch(err => {
-            console.error("Failed to copy code: ", err);
             if (window.showToast) window.showToast("Failed to copy code.", "error");
         });
     }
@@ -294,14 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const codeElement = container.querySelector('pre code');
         if (!codeElement) return;
         const codeText = codeElement.textContent;
-
-        // Language is now in the footer-right span, not code class directly
         const footer = container.querySelector('.ai-code-block-footer');
         const langSpan = footer ? footer.querySelector('.footer-right') : null;
         const language = langSpan ? langSpan.textContent.toLowerCase() : 'txt';
-
         const filename = `code_snippet.${language}`;
-
         const blob = new Blob([codeText], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -311,23 +220,20 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        console.log(`Code downloaded as ${filename}`);
         if (window.showToast) window.showToast(`Code downloaded as ${filename}`, "success");
     }
 
-    // Function to attach listeners to code block buttons *after* HTML is inserted
     function attachCodeBlockButtonListeners(messageElement) {
         if (!messageElement) return;
         messageElement.querySelectorAll('.ai-code-block-footer .footer-left button').forEach(button => {
-            if (button.textContent === '📋') { // Copy button
+            if (button.textContent === '📋') {
                 button.addEventListener('click', () => copyCodeToClipboard(button));
-            } else if (button.textContent === '⬇️') { // Download button
+            } else if (button.textContent === '⬇️') {
                 button.addEventListener('click', () => downloadCode(button));
             }
         });
     }
 
-    // Function to attach listeners to terminal command buttons *after* HTML is inserted
     function attachTerminalCommandButtonListeners(messageElement) {
          if (!messageElement) return;
          messageElement.querySelectorAll('.ai-terminal-command-block button').forEach(button => {
@@ -341,21 +247,16 @@ document.addEventListener('DOMContentLoaded', () => {
          });
     }
 
-    // NEW: Function to attach listeners to file task buttons *after* HTML is inserted
     function attachFileTaskButtonListeners(messageElement) {
         if (!messageElement) return;
         messageElement.querySelectorAll('.ai-task-item .ai-file-task-button').forEach(button => {
             const filePath = button.dataset.filepath;
             if (filePath && window.BoltDevUI && typeof window.BoltDevUI.loadFileContent === 'function') {
                 button.addEventListener('click', () => {
-                    console.log(`File task button clicked for: ${filePath}`);
                     window.BoltDevUI.loadFileContent(filePath);
-                    // Optionally switch to the code pane
                     const codeTabButton = document.querySelector('.main-top-bar .panel-tabs button[data-pane="codePane"]');
                     if (codeTabButton) codeTabButton.click();
                 });
-            } else {
-                 console.warn(`File task button found without data-filepath or loadFileContent function missing for button:`, button);
             }
         });
     }
@@ -437,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.showToast("No models found for API key.", 'info');
             }
         } catch (errorCaughtByFetch) {
-            if (!modelNameSelect.innerHTML.includes("API Key needed")) {
+            if (modelNameSelect && !modelNameSelect.innerHTML.includes("API Key needed")) {
                  modelNameSelect.innerHTML = '<option value="">Failed to load models</option>';
             }
             window.showToast(errorCaughtByFetch.message || 'Client error fetching models', 'error');
@@ -483,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: messageToSend, apiKey: uiApiKey, model: modelName })
             });
-            // Remove thinking message regardless of success/failure before appending new message
             if (thinkingMsg && thinkingMsg.parentNode === chatArea) chatArea.removeChild(thinkingMsg);
 
             if (!response.ok) {
@@ -499,36 +399,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorText);
             }
             const data = await response.json();
-            // data.reply now contains the pre-rendered HTML
             const renderedHtml = data.reply || '';
             const frontendToolCalls = data.frontend_tool_calls || { terminal_user: [], code_editor: [] };
-
-            // Append the pre-rendered HTML
             const aiMessageDiv = appendMessageToChat(renderedHtml, 'ai-message');
 
-            // Attach listeners to buttons within the newly added message div
             if (aiMessageDiv) {
                  attachCodeBlockButtonListeners(aiMessageDiv);
-                 // Terminal commands are now separate blocks added by frontend based on frontendToolCalls
-                 // attachTerminalCommandButtonListeners(aiMessageDiv); // No longer needed here
-                 attachFileTaskButtonListeners(aiMessageDiv); // Attach listeners for file task buttons
+                 attachFileTaskButtonListeners(aiMessageDiv);
             }
 
-            // --- Add UI elements for user-initiated tools (Terminal) ---
             if (frontendToolCalls.terminal_user.length > 0 && aiMessageDiv) {
                 frontendToolCalls.terminal_user.forEach(command => {
                     const commandBlock = document.createElement('div');
                     commandBlock.classList.add('ai-terminal-command-block');
-                    // Use innerHTML for pre/code to allow Prism to work later if needed, though terminal commands aren't typically highlighted
                     commandBlock.innerHTML = `<pre><code>${command}</code></pre><button class="button primary">Run Command</button>`;
-                    // Append this block *after* the main message content but still within the messageDiv
                     aiMessageDiv.appendChild(commandBlock);
                 });
-                 // Attach listeners to these newly added terminal buttons
                  attachTerminalCommandButtonListeners(aiMessageDiv);
             }
-            // --- End Add UI elements ---
-
 
             if (data.files_modified && Array.isArray(data.files_modified)) {
                 data.files_modified.forEach(filePath => window.showToast(`File system updated: ${filePath}`, 'success'));
@@ -537,18 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // --- Trigger display for the last \code_editor block found ---
             if (frontendToolCalls.code_editor.length > 0 && window.BoltDevUI && window.BoltDevUI.typeOutInCodePane) {
-                 // Only type out the last one if multiple are provided
                  const lastBlock = frontendToolCalls.code_editor[frontendToolCalls.code_editor.length - 1];
-                 console.log(`Triggering type out for: ${lastBlock.path}`);
-                 // Use a slight delay to ensure the message bubble is fully rendered
                  setTimeout(() => {
                      window.BoltDevUI.typeOutInCodePane(lastBlock.path, lastBlock.content);
-                 }, 100); // Adjust delay as needed
+                 }, 100);
             }
-            // --- End Trigger ---
-
 
         } catch (errorCaughtBySendChat) {
             if (thinkingMsg && thinkingMsg.parentNode === chatArea) chatArea.removeChild(thinkingMsg);
@@ -593,19 +475,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Main Layout Elements
+    const aiSidebar = document.getElementById('aiSidebar');
+    const mainContentWrapper = document.getElementById('mainContentWrapper');
+    const resizerAiMain = document.getElementById('resizerAiMain');
+    const codePane = document.getElementById('codePane');
+    const diffPane = document.getElementById('diffPane');
+    const previewPane = document.getElementById('previewPane');
+    const contentPanes = [codePane, diffPane, previewPane].filter(p => p);
+    
     if (resizerAiMain && aiSidebar && mainContentWrapper) {
         window.BoltDevUI.makeResizable(resizerAiMain, aiSidebar, mainContentWrapper, () => {
-            if (typeof window.BoltDevUI.fitTerminal === 'function') window.BoltDevUI.fitTerminal();
             if (codePane && codePane.classList.contains('active-pane') && window.BoltDevUI.handleCodePaneResize) {
                  window.BoltDevUI.handleCodePaneResize();
+            }
+            if (terminalPane && terminalPane.style.display !== 'none' && activeTerminalId && terminalInstances[activeTerminalId]) {
+                terminalInstances[activeTerminalId].adjustSuggestionBoxPosition();
             }
         });
     }
 
     window.addEventListener('resize', () => {
-        if (typeof window.BoltDevUI.fitTerminal === 'function') window.BoltDevUI.fitTerminal();
         if (codePane && codePane.classList.contains('active-pane') && window.BoltDevUI.handleCodePaneResize) {
              window.BoltDevUI.handleCodePaneResize();
+        }
+        if (terminalPane && terminalPane.style.display !== 'none') {
+            Object.values(terminalInstances).forEach(termInstance => {
+                if (termInstance.isActive) {
+                    termInstance.adjustSuggestionBoxPosition();
+                }
+            });
         }
     });
 
@@ -613,19 +512,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.className = ''; document.documentElement.classList.add(themeName);
         localStorage.setItem('selectedTheme', themeName);
         updateAnsiColors();
-        if (term && term.element) {
-            const newThemeOptions = getXtermThemeObjectFromCss();
-            if (term.options && term.options.theme) Object.assign(term.options.theme, newThemeOptions);
-            else term.options.theme = newThemeOptions;
-            term.refresh(0, term.rows - 1);
-            let isTerminalEffectivelyEmpty = true;
-            if (term.buffer && term.buffer.active) {
-                const buffer = term.buffer.active; let significantLines = 0;
-                for (let i = 0; i < buffer.length; i++) if (buffer.getLine(i) && buffer.getLine(i).translateToString(true).trim() !== '') significantLines++;
-                isTerminalEffectivelyEmpty = significantLines < 3;
-            }
-            if (isTerminalEffectivelyEmpty && typeof writeInitialTerminalMessages === 'function') { term.clear(); writeInitialTerminalMessages(); }
-        }
     }
 
     const mainTopBarTabsContainer = document.querySelector('.main-top-bar .main-tabs.panel-tabs');
@@ -660,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 targetPane.classList.remove('active-pane', 'slide-to-left', 'slide-to-right', 'slide-from-left-init', 'slide-from-right-init');
                 targetPane.classList.add(targetPaneIndex > previousPaneIndex ? 'slide-from-right-init' : 'slide-from-left-init');
-                void targetPane.offsetWidth; // Force reflow
+                void targetPane.offsetWidth;
                 targetPane.classList.add('active-pane');
                 currentPaneId = targetPaneId;
 
@@ -671,24 +557,192 @@ document.addEventListener('DOMContentLoaded', () => {
                          else if (targetPane.id === 'diffPane' && window.BoltDevUI.activateDiffPane) window.BoltDevUI.activateDiffPane(currentlyOpenFilePath, currentlyOpenFileContent, currentlyOpenFileLangClass);
                          else if (targetPane.id === 'previewPane' && window.BoltDevUI.activatePreviewPane) window.BoltDevUI.activatePreviewPane();
                     }
-                    if (typeof window.BoltDevUI.fitTerminal === 'function') window.BoltDevUI.fitTerminal();
                     if (codePane && codePane.classList.contains('active-pane') && window.BoltDevUI.handleCodePaneResize) window.BoltDevUI.handleCodePaneResize();
-                }, 350); // Match CSS transition duration
+                }, 350);
             });
         });
     }
 
-    const terminalTabsContainer = document.querySelector('.terminal-tabs-bar .panel-tabs');
-    if (terminalTabsContainer) {
-        const terminalHeaderButtons = Array.from(terminalTabsContainer.querySelectorAll('button'));
-        terminalHeaderButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                if (e.target.classList.contains('icon-button')) return;
-                terminalHeaderButtons.forEach(btn => btn.classList.remove('active-tab'));
-                button.classList.add('active-tab');
+    // --- Terminal Management ---
+    function createNewTerminalInstanceHTML(id) {
+        const initialPath = `~/project_files`;
+        const instanceHTML = `
+            <div class="terminal-instance" data-terminal-id="${id}">
+                <div class="terminal-toolbar">
+                    <div class="terminal-path" data-terminal-id="${id}" title="${initialPath}">${initialPath}</div>
+                    <div class="terminal-controls">
+                        <button class="icon-button control-btn" title="Split Terminal (Not Implemented)">⫲</button>
+                        <button class="icon-button control-btn" title="Kill Terminal">✕</button>
+                    </div>
+                </div>
+                <div class="terminal-container" data-terminal-id="${id}">
+                    <div class="terminal-command-history" data-terminal-id="${id}"></div>
+                    <div class="terminal-content" data-terminal-id="${id}" aria-live="polite"></div>
+                    <div class="terminal-input-line" data-terminal-id="${id}">
+                        <span class="terminal-prompt" data-terminal-id="${id}"></span>
+                        <input type="text" class="terminal-input"
+                               placeholder="Type your command..."
+                               aria-label="Terminal command input for terminal ${id}"
+                               spellcheck="false"
+                               autocomplete="off"
+                               data-terminal-id="${id}">
+                    </div>
+                </div>
+            </div>
+        `;
+        const tabHTML = `
+            <div class="terminal-tab" data-terminal-id="${id}">
+                <span class="tab-icon">⚡</span>
+                <span class="tab-text">PowerShell ${id}</span>
+                <button class="tab-close" aria-label="Close terminal ${id}" data-terminal-id="${id}">×</button>
+            </div>
+        `;
+        return { instanceHTML, tabHTML };
+    }
+
+    function addTerminalEventListeners(tabElement, instanceElement) {
+        tabElement.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-close')) return;
+            const termId = tabElement.dataset.terminalId;
+            setActiveTerminal(termId);
+        });
+
+        const closeButton = tabElement.querySelector('.tab-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const termId = closeButton.dataset.terminalId;
+                closeTerminal(termId);
             });
+        }
+        const killButton = instanceElement.querySelector('.terminal-controls .icon-button[title="Kill Terminal"]');
+        if (killButton) {
+            killButton.addEventListener('click', () => {
+                 const termId = instanceElement.dataset.terminalId;
+                 closeTerminal(termId);
+            });
+        }
+    }
+
+    function setActiveTerminal(id) {
+        if (activeTerminalId === id && terminalInstances[id] && terminalInstances[id].isActive) {
+            if (terminalPane.style.display !== 'none' && terminalInstances[id]) {
+                terminalInstances[id].focus();
+            }
+            return;
+        }
+
+        if (activeTerminalId && terminalInstances[activeTerminalId]) {
+            terminalInstances[activeTerminalId].deactivate();
+            const oldTab = terminalTabsContainer.querySelector(`.terminal-tab[data-terminal-id="${activeTerminalId}"]`);
+            if (oldTab) oldTab.classList.remove('active');
+        }
+
+        activeTerminalId = id;
+        if (terminalInstances[id]) {
+            terminalInstances[id].activate();
+            const newTab = terminalTabsContainer.querySelector(`.terminal-tab[data-terminal-id="${id}"]`);
+            if (newTab) newTab.classList.add('active');
+        } else {
+            console.warn(`No terminal instance found for ID: ${id} during setActiveTerminal`);
+        }
+    }
+
+    function createAndActivateNewTerminal() {
+        const currentId = nextTerminalId.toString();
+        nextTerminalId++;
+
+        const { instanceHTML, tabHTML } = createNewTerminalInstanceHTML(currentId);
+
+        terminalInstancesContainer.insertAdjacentHTML('beforeend', instanceHTML);
+        terminalTabsContainer.insertAdjacentHTML('beforeend', tabHTML);
+
+        const newTabElement = terminalTabsContainer.querySelector(`.terminal-tab[data-terminal-id="${currentId}"]`);
+        const newInstanceElement = terminalInstancesContainer.querySelector(`.terminal-instance[data-terminal-id="${currentId}"]`);
+
+        if (!newTabElement || !newInstanceElement) {
+            console.error("Failed to create new terminal elements in DOM.");
+            return;
+        }
+        
+        terminalInstances[currentId] = new TerminalEnhancer(currentId);
+        if (!terminalInstances[currentId].terminalInput) {
+            console.error(`TerminalEnhancer for ID ${currentId} failed to initialize properly. Removing.`);
+            newTabElement.remove();
+            newInstanceElement.remove();
+            delete terminalInstances[currentId];
+            return;
+        }
+
+        addTerminalEventListeners(newTabElement, newInstanceElement);
+        setActiveTerminal(currentId);
+        if (terminalPane.style.display === 'none' || getComputedStyle(terminalPane).display === 'none') {
+            terminalPane.style.display = 'flex';
+        }
+    }
+
+    function closeTerminal(id) {
+        if (!terminalInstances[id]) return;
+
+        terminalInstances[id].destroy();
+        delete terminalInstances[id];
+
+        const tabToRemove = terminalTabsContainer.querySelector(`.terminal-tab[data-terminal-id="${id}"]`);
+        const instanceToRemove = terminalInstancesContainer.querySelector(`.terminal-instance[data-terminal-id="${id}"]`);
+        if (tabToRemove) tabToRemove.remove();
+        if (instanceToRemove) instanceToRemove.remove();
+
+        localStorage.removeItem(`terminalHistory_${id}`);
+
+        if (activeTerminalId === id) {
+            activeTerminalId = null;
+            const remainingTabs = terminalTabsContainer.querySelectorAll('.terminal-tab');
+            if (remainingTabs.length > 0) {
+                setActiveTerminal(remainingTabs[remainingTabs.length - 1].dataset.terminalId);
+            } else if (terminalPane.style.display !== 'none') {
+                terminalPane.style.display = 'none';
+            }
+        }
+    }
+
+    if (newTerminalBtn) {
+        newTerminalBtn.addEventListener('click', createAndActivateNewTerminal);
+    }
+
+    if (terminalPane) {
+        if (getComputedStyle(terminalPane).display !== 'none' && Object.keys(terminalInstances).length === 0) {
+            createAndActivateNewTerminal();
+        }
+    }
+
+
+    if (toggleMainTerminalBtn && terminalPane) {
+        toggleMainTerminalBtn.addEventListener('click', () => {
+            const isHidden = terminalPane.style.display === 'none' || getComputedStyle(terminalPane).display === 'none';
+            terminalPane.style.display = isHidden ? 'flex' : 'none';
+            if (isHidden) {
+                if (Object.keys(terminalInstances).length === 0) {
+                    createAndActivateNewTerminal();
+                } else if (activeTerminalId && terminalInstances[activeTerminalId]) {
+                    setTimeout(() => {
+                         terminalInstances[activeTerminalId].activate();
+                    }, 50);
+                } else if (Object.keys(terminalInstances).length > 0) {
+                    const firstAvailableId = Object.keys(terminalInstances)[0];
+                    setActiveTerminal(firstAvailableId);
+                }
+            }
+            if (!isHidden && activeTerminalId && terminalInstances[activeTerminalId]) {
+                 setTimeout(() => terminalInstances[activeTerminalId].adjustSuggestionBoxPosition(), 50);
+            }
+
+            if (codePane && codePane.classList.contains('active-pane') && window.BoltDevUI.handleCodePaneResize) {
+                window.BoltDevUI.handleCodePaneResize();
+            }
         });
     }
+    // --- End Terminal Management ---
+
 
     updateAnsiColors();
     if (themeSelect) {
@@ -699,7 +753,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchAndPopulateModels("");
 
-    if (mainTopBarButtons.length > 0 && contentPanes.length > 0) {
+    if (mainTopBarTabsContainer && contentPanes.length > 0) {
+        const mainTopBarButtons = Array.from(mainTopBarTabsContainer.querySelectorAll('button'));
         const initialActiveButton = mainTopBarButtons.find(btn => btn.dataset.pane === currentPaneId);
         const initialActivePane = document.getElementById(currentPaneId);
         if (initialActiveButton) initialActiveButton.classList.add('active-tab');
@@ -724,10 +779,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (terminalTabsContainer) {
-        const firstTerminalTab = terminalTabsContainer.querySelector('button:not(.icon-button)');
-        if (firstTerminalTab) firstTerminalTab.classList.add('active-tab');
-    }
 
     const fileChangesButton = document.getElementById('fileChangesButton');
     if(fileChangesButton) {
@@ -737,17 +788,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (toggleMainTerminalBtn && terminalPane) {
-        toggleMainTerminalBtn.addEventListener('click', () => {
-            const isHidden = terminalPane.style.display === 'none' || terminalPane.offsetHeight === 0;
-            terminalPane.style.display = isHidden ? 'flex' : 'none';
-            setTimeout(() => {
-                if (typeof window.BoltDevUI.fitTerminal === 'function') window.BoltDevUI.fitTerminal();
-                if (codePane && codePane.classList.contains('active-pane') && window.BoltDevUI.handleCodePaneResize) {
-                    window.BoltDevUI.handleCodePaneResize();
-                }
-            }, 30);
-        });
-    }
 });
 // --- END OF FILE script.js ---

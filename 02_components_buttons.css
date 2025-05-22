@@ -1,0 +1,33 @@
+/* --- START OF FILE 02_components_buttons.css --- */
+/* --- Buttons --- */
+button, .button { /* Added .button class for link-styled buttons */
+    font-family: inherit;
+    font-size: 0.875rem;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color-soft);
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+button:hover, .button:hover { background-color: var(--bg-hover); border-color: var(--border-interactive); }
+button:active, .button:active { background-color: var(--bg-active); transform: translateY(1px); }
+button:disabled, .button:disabled { opacity: 0.5; cursor: not-allowed; background-color: var(--bg-inset); }
+
+button.primary, .button.primary, #sendChatButton {
+    background-color: var(--accent-primary); border-color: var(--accent-primary); color: var(--text-on-accent); font-weight: 500;
+}
+button.primary:hover, .button.primary:hover, #sendChatButton:hover {
+    background-color: var(--accent-primary-hover); border-color: var(--accent-primary-hover); box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+}
+.icon-button { padding: var(--spacing-unit); line-height: 1; min-width: auto; background: transparent; border:none; color: var(--text-secondary); }
+.icon-button:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+
+#setApiKeyButton {
+    background-color: var(--accent-success); border-color: var(--accent-success); color: var(--text-on-accent);
+}
+#setApiKeyButton:hover { background-color: color-mix(in srgb, var(--accent-success) 85%, #000); border-color: color-mix(in srgb, var(--accent-success) 85%, #000); }
+/*

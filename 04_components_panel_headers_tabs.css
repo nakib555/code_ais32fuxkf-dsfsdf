@@ -1,0 +1,69 @@
+/* --- START OF FILE 04_components_panel_headers_tabs.css --- */
+/* --- Panel Headers (Tab Bars) --- */
+.panel-header { /* Common class for all tab-like headers */
+    display: flex; align-items: center; background-color: var(--bg-surface);
+    height: var(--header-height); padding: 0 var(--spacing-unit);
+    border-bottom: 1px solid var(--border-color-strong);
+    flex-shrink: 0;
+}
+.main-top-bar { justify-content: space-between; padding-left: calc(var(--spacing-unit) * 2); padding-right: calc(var(--spacing-unit) * 2); }
+
+.panel-tabs { display: flex; align-items: center; height: 100%; }
+.panel-tabs button, .panel-tabs .file-tab { /* Generic tab button */
+    background: none; border: none; color: var(--text-secondary);
+    padding: 0 calc(var(--spacing-unit) * 1.5); height: 100%;
+    cursor: pointer; font-size: 0.875rem;
+    border-bottom: 3px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    margin-right: var(--spacing-unit);
+}
+.panel-tabs button:last-child, .panel-tabs .file-tab:last-child { margin-right: 0; }
+.panel-tabs button:hover, .panel-tabs .file-tab:hover { color: var(--text-primary); }
+.panel-tabs button.active-tab, .panel-tabs .file-tab.active-tab {
+    color: var(--text-headings); border-bottom-color: var(--accent-primary); font-weight: 500;
+}
+
+/* --- Main Top Bar Specific Tab Styling (Pill Shape) --- */
+.main-top-bar .panel-tabs {
+    gap: calc(var(--spacing-unit) * 0.5);
+    height: auto;
+    padding: calc(var(--spacing-unit) * 0.5);
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-inset);
+    margin-left: calc(var(--spacing-unit) * -1);
+}
+
+.main-top-bar .panel-tabs button {
+    background-color: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    color: var(--text-secondary);
+    font-weight: 400;
+    height: auto;
+    border-bottom: none;
+    margin-right: 0;
+    flex-shrink: 0;
+}
+
+.main-top-bar .panel-tabs button:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.main-top-bar .panel-tabs button.active-tab {
+    background-color: var(--accent-secondary);
+    color: var(--text-on-accent);
+    font-weight: 500;
+    border-bottom: none;
+}
+
+.main-actions { display: flex; align-items: center; gap: var(--spacing-unit); }
+.main-actions button {
+    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); font-size: 0.8125rem; /* 13px */
+    border-color: transparent; background-color: transparent;
+}
+.main-actions button:hover { background-color: var(--bg-hover); border-color: var(--border-color-soft); }
+.main-actions .close-button { font-size: 1.25rem; padding: calc(var(--spacing-unit)*0.5); }
+/*

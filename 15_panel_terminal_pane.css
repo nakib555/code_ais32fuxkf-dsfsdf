@@ -1,0 +1,188 @@
+/* --- START OF FILE 15_panel_terminal_pane.css --- */
+/* Terminal Pane */
+.terminal-pane {
+    display: flex;
+    flex-direction: column;
+    height: 300px; /* Initial height */
+    min-height: 120px; /* Min height for usability */
+    max-height: 70vh; /* Allow more vertical space */
+    background-color: var(--vscode-panel-background, #1e1e1e); /* Use VSCode var or fallback */
+    border-top: 1px solid var(--vscode-panel-border, #3d3d3d);
+    resize: vertical;
+    overflow: hidden; /* Important for resize and internal layout */
+}
+
+/* Terminal Tab Bar */
+.terminal-tabs-header {
+    height: 35px;
+    background-color: var(--vscode-editorGroupHeader-tabsBackground, #252526);
+    border-bottom: 1px solid var(--vscode-editorGroupHeader-tabsBorder, #3d3d3d);
+    display: flex;
+    align-items: center;
+    padding: 0 5px 0 10px; /* Adjusted padding */
+    flex-shrink: 0;
+    justify-content: space-between;
+    user-select: none;
+}
+
+.terminal-tabs-header .terminal-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 1px; /* Thinner gap */
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-grow: 1; /* Allow tabs to take available space */
+}
+/* Scrollbar for tabs if they overflow */
+.terminal-tabs-header .terminal-tabs::-webkit-scrollbar { height: 3px; }
+.terminal-tabs-header .terminal-tabs::-webkit-scrollbar-track { background: transparent; }
+.terminal-tabs-header .terminal-tabs::-webkit-scrollbar-thumb { background: var(--vscode-scrollbarSlider-background, #4d4d4d); border-radius: 3px;}
+
+
+.terminal-tabs-header .terminal-tab {
+    background-color: var(--vscode-tab-inactiveBackground, #2d2d2d);
+    color: var(--vscode-tab-inactiveForeground, #cccccc);
+    border: 1px solid var(--vscode-editorGroupHeader-tabsBorder, #3d3d3d);
+    border-top-width: 0; /* Remove top border for cleaner look */
+    border-bottom: none;
+    padding: 0 10px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 4px 4px 0 0;
+    max-width: 200px; /* Prevent tabs from becoming too wide */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative; /* For pseudo-elements if needed */
+    transition: background-color 0.1s ease, color 0.1s ease;
+}
+.terminal-tabs-header .terminal-tab:hover {
+    background-color: var(--vscode-tab-hoverBackground, #353535);
+}
+
+.terminal-tabs-header .terminal-tab.active {
+    background-color: var(--vscode-tab-activeBackground, var(--vscode-panel-background, #1e1e1e));
+    color: var(--vscode-tab-activeForeground, #ffffff);
+    border-left-color: var(--vscode-editorGroupHeader-tabsBorder, #3d3d3d);
+    border-right-color: var(--vscode-editorGroupHeader-tabsBorder, #3d3d3d);
+    border-top: 1px solid var(--vscode-editorGroupHeader-tabsBorder, #3d3d3d); /* Add top border for active tab */
+    border-bottom-color: var(--vscode-tab-activeBackground, var(--vscode-panel-background, #1e1e1e)); /* Merge with content area */
+    z-index: 1; /* Bring active tab to front */
+}
+
+.terminal-tabs-header .terminal-tab .tab-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.terminal-tabs-header .terminal-tab .tab-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.terminal-tabs-header .terminal-tab .tab-close {
+    background: none; border: none; color: var(--vscode-tab-inactiveForeground, #cccccc); cursor: pointer;
+    padding: 3px; margin-left: auto; /* Push to the right */
+    font-size: 14px; line-height: 1;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+.terminal-tabs-header .terminal-tab .tab-close:hover {
+    color: var(--vscode-tab-activeForeground, #ffffff);
+    background-color: var(--vscode-list-hoverBackground, #55555580); /* Semi-transparent hover */
+    opacity: 1;
+}
+.terminal-tabs-header .terminal-tab.active .tab-close {
+    color: var(--vscode-tab-activeForeground, #ffffff);
+}
+
+
+.terminal-tabs-header .terminal-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* Reduced gap */
+    padding-left: 8px; /* Space from tabs */
+}
+.terminal-tabs-header .terminal-actions .icon-button { /* Re-using existing .icon-button style */
+    background: none;
+    border: none;
+    color: var(--vscode-icon-foreground, #ccc);
+    padding: 6px; /* Slightly larger click area */
+    font-size: 16px;
+    border-radius: var(--radius-sm);
+    line-height: 1;
+}
+.terminal-tabs-header .terminal-actions .icon-button:hover {
+    background-color: var(--vscode-toolbar-hoverBackground, #3e3e3e);
+}
+
+/* Area holding all terminal instances */
+.terminal-instances {
+    flex-grow: 1;
+    position: relative; /* For absolute positioning of instances if needed, though flex is better */
+    overflow: hidden;
+    display: flex; /* Each instance will fill this */
+    background-color: var(--vscode-panel-background, #1e1e1e); /* Background for the whole area */
+}
+
+.terminal-instance {
+    width: 100%;
+    height: 100%;
+    display: none; /* Hidden by default, JS toggles .active */
+    flex-direction: column;
+}
+.terminal-instance.active {
+    display: flex;
+}
+
+/* Toolbar within each terminal instance */
+.terminal-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 8px; /* Reduced padding */
+    background-color: var(--vscode-editorWidget-background, #252526);
+    flex-shrink: 0;
+    font-size: 11px; /* Smaller font */
+    color: var(--vscode-editorWidget-foreground, #ccc);
+    border-bottom: 1px solid var(--vscode-editorWidget-border, #3d3d3d);
+    height: 24px; /* Fixed height */
+    user-select: none;
+}
+.terminal-toolbar .terminal-path {
+    font-family: var(--font-code);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.terminal-toolbar .terminal-controls {
+    display: flex;
+    gap: 4px;
+}
+.terminal-toolbar .terminal-controls .icon-button { /* Re-using existing .icon-button style */
+    padding: 2px 4px;
+    font-size: 14px;
+}
+/* .terminal-toolbar .terminal-controls .icon-button:hover { ... inherited ... } */
+
+
+/* Accessibility & Focus (already present, ensure they work with new structure) */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.terminal-button:focus-visible { /* Generic class for buttons in terminal if any */
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 1px;
+}

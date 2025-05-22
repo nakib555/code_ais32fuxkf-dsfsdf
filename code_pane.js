@@ -311,25 +311,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function _selectFileInExplorer(filePath) {
-         let attempts = 0;
-         const maxAttempts = 10;
-         const findAndSelect = () => {
-             const selectedFileLi = fileListEl ? fileListEl.querySelector(`li[data-path="${filePath}"]`) : null;
-             if (selectedFileLi) {
-                 const parentUl = selectedFileLi.parentElement;
-                 if(parentUl) parentUl.querySelectorAll('li.selected').forEach(el => el.classList.remove('selected'));
-                 selectedFileLi.classList.add('selected');
-                 selectedFileLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                 console.log(`code_pane.js: File ${filePath} selected in explorer.`);
-             } else if (attempts < maxAttempts) {
-                 attempts++;
-                 console.log(`code_pane.js: File element for ${filePath} not found yet, retrying... (Attempt ${attempts})`);
-                 setTimeout(findAndSelect, 100);
-             } else {
-                  console.warn(`code_pane.js: Could not find li element for path ${filePath} after operation.`);
-             }
-         };
-         setTimeout(findAndSelect, 100);
+        if (!filePath) return;
+
+        let attempts = 0;
+        const maxAttempts = 10;
+        let pathParts = filePath.split('/');
+
+        const findAndSelect = async () => {
+            // First, ensure the file explorer is visible
+            const filesTab = fileExplorerButtons.find(btn => btn.textContent === 'Files');
+            if (filesTab && !filesTab.classList.contains('active-tab')) {
+                filesTab.click();
+            }
+
+            // Try to find the file element
+            const selectedFileLi = fileListEl ? fileListEl.querySelector(`li[data-path="${filePath}"]`) : null;
+            
+            if (selectedFileLi) {
+                // Ensure parent folders are expanded
+                let currentElement = selectedFileLi;
+                while (currentElement && currentElement !== fileListEl) {
+                    const parentLi = currentElement.closest('li[data-isdir="true"]');
+                    if (parentLi && !parentLi.classList.contains('open')) {
+                        const chevron = parentLi.querySelector('.file-explorer-chevron');
+                        if (chevron) {
+                            // Trigger folder expansion
+                            chevron.click();
+                            // Wait for expansion animation
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    }
+                    currentElement = parentLi;
+                }
+
+                // Remove selection from other items
+                const parentUl = selectedFileLi.parentElement;
+                if (parentUl) {
+                    parentUl.querySelectorAll('li.selected').forEach(el => el.classList.remove('selected'));
+                }
+
+                // Select and scroll to the item
+                selectedFileLi.classList.add('selected');
+                selectedFileLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                console.log(`code_pane.js: File ${filePath} selected in explorer.`);
+                
+            } else if (attempts < maxAttempts) {
+                attempts++;
+                console.log(`code_pane.js: File element for ${filePath} not found yet, retrying... (Attempt ${attempts})`);
+                setTimeout(findAndSelect, 200); // Increased delay to give more time for the UI to update
+            } else {
+                console.warn(`code_pane.js: Could not find li element for path ${filePath} after operation.`);
+                // Fallback: Try to refresh the file explorer
+                if (window.BoltDevUI && window.BoltDevUI.refreshFileExplorer) {
+                    window.BoltDevUI.refreshFileExplorer();
+                }
+            }
+        };
+
+        // Start the selection process
+        setTimeout(findAndSelect, 100);
     }
 
     function attachAllEventListeners() {
@@ -540,6 +580,118 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         console.log("code_pane.js: Saved expanded folders:", expandedFolders);
+    };
+
+    // Add search highlight capabilities to BoltDevUI
+    window.BoltDevUI.highlightSearchResults = function(searchQuery) {
+        if (!codeDisplayCode || !searchQuery) return;
+        
+        // Remove existing highlights
+        Array.from(codeDisplayCode.getElementsByClassName('search-highlight')).forEach(el => {
+            const parent = el.parentNode;
+            parent.replaceChild(document.createTextNode(el.textContent), el);
+        });
+
+        if (!searchQuery.trim()) return;
+
+        // Create a regex for the search query, escape special characters
+        const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedQuery, 'gi');
+
+        // Function to highlight text node content
+        function highlightTextContent(node) {
+            const matches = node.textContent.match(regex);
+            if (!matches) return false;
+
+            const fragment = document.createDocumentFragment();
+            let lastIndex = 0;
+            let match;
+
+            regex.lastIndex = 0; // Reset regex state
+            while ((match = regex.exec(node.textContent)) !== null) {
+                // Add text before match
+                if (match.index > lastIndex) {
+                    fragment.appendChild(document.createTextNode(
+                        node.textContent.slice(lastIndex, match.index)
+                    ));
+                }
+
+                // Add highlighted match
+                const highlight = document.createElement('span');
+                highlight.className = 'search-highlight';
+                highlight.textContent = match[0];
+                fragment.appendChild(highlight);
+
+                lastIndex = regex.lastIndex;
+            }
+
+            // Add remaining text
+            if (lastIndex < node.textContent.length) {
+                fragment.appendChild(document.createTextNode(
+                    node.textContent.slice(lastIndex)
+                ));
+            }
+
+            node.parentNode.replaceChild(fragment, node);
+            return true;
+        }
+
+        // Walk through text nodes and highlight matches
+        const walker = document.createTreeWalker(
+            codeDisplayCode,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+
+        let textNode;
+        let hasHighlights = false;
+        while ((textNode = walker.nextNode())) {
+            if (highlightTextContent(textNode)) {
+                hasHighlights = true;
+            }
+        }
+
+        return hasHighlights;
+    };
+
+    window.BoltDevUI.navigateSearchResults = function(direction) {
+        const highlights = Array.from(codeDisplayCode.getElementsByClassName('search-highlight'));
+        if (!highlights.length) return;
+
+        let currentHighlight = codeDisplayCode.querySelector('.search-highlight.current');
+        let nextIndex = 0;
+
+        if (currentHighlight) {
+            const currentIndex = highlights.indexOf(currentHighlight);
+            if (direction === 'next') {
+                nextIndex = (currentIndex + 1) % highlights.length;
+            } else {
+                nextIndex = (currentIndex - 1 + highlights.length) % highlights.length;
+            }
+            currentHighlight.classList.remove('current');
+        }
+
+        const nextHighlight = highlights[nextIndex];
+        nextHighlight.classList.add('current');
+        nextHighlight.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        return {
+            current: nextIndex + 1,
+            total: highlights.length
+        };
+    };
+
+    // Extend the existing _loadFileContent function
+    const originalLoadFileContent = window.BoltDevUI.loadFileContent;
+    window.BoltDevUI.loadFileContent = async function(filePath, searchQuery = '') {
+        await originalLoadFileContent(filePath);
+        if (searchQuery) {
+            window.BoltDevUI.highlightSearchResults(searchQuery);
+        }
     };
 
     // --- Initial Activation ---

@@ -8,13 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <!-- Xterm.css is no longer needed for the custom terminal -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" /> -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_customization.css') }}">
 </head>
 <body>
     <div class="app-container">
@@ -119,16 +121,53 @@
                 </div>
             </main>
 
-            <aside class="terminal-pane" id="terminalPane">
-                 <header class="terminal-tabs-bar panel-header">
-                    <div class="panel-tabs">
-                        <button>Bolt Terminal</button>
-                        <button>Terminal</button>
+            <!-- TERMINAL PANE: Updated Structure -->
+            <aside class="terminal-pane" id="terminalPane" aria-label="Terminal Panel">
+                <header class="terminal-tabs-header">
+                    <div class="terminal-tabs" id="terminalTabsContainer">
+                        <!-- Tabs dynamically added by JS -->
+                        <!-- Example of a tab (JS will create these):
+                        <div class="terminal-tab active" data-terminal-id="1">
+                            <span class="tab-icon">⚡</span>
+                            <span class="tab-text">PowerShell 1</span>
+                            <button class="tab-close" aria-label="Close terminal 1" data-terminal-id="1">×</button>
+                        </div>
+                        -->
                     </div>
-                    <button class="icon-button" title="New Terminal Tab">+</button>
-                 </header>
-                <div id="terminal" class="terminal-content"></div>
+                    <div class="terminal-actions">
+                        <button class="icon-button new-terminal-btn" title="New Terminal" aria-label="New Terminal">+</button>
+                        <button class="icon-button terminal-options-btn" title="Terminal Options" aria-label="Terminal Options">⚙️</button>
+                    </div>
+                </header>
+                <div class="terminal-instances" id="terminalInstancesContainer">
+                    <!-- Terminal instances will be dynamically added here by JS -->
+                    <!-- Example of an instance (JS will create these):
+                    <div class="terminal-instance active" data-terminal-id="1">
+                        <div class="terminal-toolbar">
+                            <div class="terminal-path" data-terminal-id="1" title="~/my_ai_coding_agent">~/my_ai_coding_agent</div>
+                            <div class="terminal-controls">
+                                <button class="icon-button control-btn" title="Split Terminal (Not Implemented)">⫲</button>
+                                <button class="icon-button control-btn" title="Kill Terminal">✕</button>
+                            </div>
+                        </div>
+                        <div class="terminal-container" data-terminal-id="1">
+                            <div class="terminal-command-history" data-terminal-id="1"></div> <!- Suggestions container ->
+                            <div class="terminal-content" data-terminal-id="1" aria-live="polite"></div> <!- Output area ->
+                            <div class="terminal-input-line" data-terminal-id="1">
+                                <span class="terminal-prompt" data-terminal-id="1"></span> <!- Prompt ->
+                                <input type="text" class="terminal-input"
+                                       placeholder="Type your command..."
+                                       aria-label="Terminal command input for terminal 1"
+                                       spellcheck="false"
+                                       autocomplete="off"
+                                       data-terminal-id="1">
+                            </div>
+                        </div>
+                    </div>
+                    -->
+                </div>
             </aside>
+            <!-- END TERMINAL PANE -->
         </div>
     </div>
 
@@ -139,8 +178,9 @@
         <span>Spaces: 2</span>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <!-- Xterm.js scripts are no longer needed for the custom terminal -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script> -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
@@ -149,10 +189,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <script src="{{ url_for('static', filename='js/ai_message_renderer.js') }}"></script> <!-- Add this script tag -->
+    <script src="{{ url_for('static', filename='js/ai_message_renderer.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/terminal_enhancer.js') }}"></script>
     <script src="{{ url_for('static', filename='js/code_pane.js') }}"></script>
     <script src="{{ url_for('static', filename='js/diff_pane.js') }}"></script>
     <script src="{{ url_for('static', filename='js/preview_pane.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/file_search_locks.js') }}"></script>
 </body>
 </html>

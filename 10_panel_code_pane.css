@@ -1,0 +1,14 @@
+/* --- START OF FILE 10_panel_code_pane.css --- */
+/* Code Pane Specifics */
+#codePane { /* This is a .content-pane, so above rules apply */
+    flex-direction: row; /* Override .content-pane's flex-direction: column */
+    background-color: transparent; /* Let children define background */
+}
+#codePane > .file-explorer-wrapper,
+#codePane > .code-editor-area-wrapper {
+    height: 100%; /* Fill the height of the codePane */
+}
+#codePane > .resizer-horizontal { /* This is the resizer between explorer and editor */
+    height: 100%;
+}
+/*

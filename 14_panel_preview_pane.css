@@ -1,0 +1,51 @@
+/* --- START OF FILE 14_panel_preview_pane.css --- */
+/* Preview Pane Styles */
+.preview-header { /* .panel-header is used */
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--spacing-unit);
+}
+.preview-nav-controls, .preview-actions {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.5);
+}
+.preview-url-input {
+    flex-grow: 1;
+    margin: 0 var(--spacing-unit);
+    background-color: var(--bg-inset);
+    border: 1px solid var(--border-color-soft);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit);
+    font-size: 0.8125rem;
+}
+.preview-url-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+}
+.preview-content-area { /* .pane-content-area provides base flex properties */
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* Remove padding if iframe is to be edge-to-edge */
+}
+.preview-placeholder {
+    display: none; /* JS will control this */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-secondary);
+    height: 100%;
+    width: 100%; /* Ensure it takes full space if no iframe */
+    font-size: 0.9rem;
+}
+
+#previewInternalIframe {
+    display: none; /* JS will control this */
+    width:100%;
+    height: 100%;
+    border:none;
+    background-color: var(--bg-app); /* Default to app background, content will override */
+}
+/*

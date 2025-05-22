@@ -1,0 +1,28 @@
+/* --- START OF FILE 12_panel_code_editor.css --- */
+/* Code Editor */
+.code-editor-area-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background-color: var(--bg-inset); }
+.editor-file-tabs-bar { justify-content: flex-start; } /* .panel-header is used */
+.editor-file-tabs-bar .file-tab { border-right: 1px solid var(--border-color-soft); } /* .panel-tabs .file-tab is used */
+.editor-file-tabs-bar .file-tab:not(.active-tab) { background-color: transparent; }
+.editor-file-tabs-bar .file-tab.active-tab { background-color: var(--bg-inset); border-bottom-color: var(--accent-primary); }
+.file-tab span { margin-right: var(--spacing-unit); }
+.file-tab .close-file-tab {
+    background:none; border:none; color:var(--text-secondary); cursor:pointer;
+    padding:calc(var(--spacing-unit)*0.5); border-radius:var(--radius-sm); font-size: 1rem; line-height: 1; margin-left: var(--spacing-unit);
+}
+.file-tab .close-file-tab:hover { background-color:var(--bg-hover); color:var(--text-primary); }
+.code-editor-content { flex-grow: 1; overflow: auto; position: relative; }
+pre[class*="language-"] {
+    margin: 0 !important; background-color: var(--bg-inset) !important;
+    font-family: var(--font-code) !important; font-size: 0.875rem !important;
+    line-height: 1.6 !important; padding: var(--spacing-unit) !important; height: 100%;
+    box-sizing: border-box;
+}
+pre[class*="language-"].line-numbers { padding-left: 3.8em !important; }
+.line-numbers .line-numbers-rows {
+    border-right: 1px solid var(--border-color-soft) !important; background-color: var(--bg-inset) !important;
+    padding-top: var(--spacing-unit) !important; top: 0 !important; font-size: 0.8125rem !important;
+}
+.line-numbers-rows > span:before { color: var(--text-secondary) !important; opacity: 0.7; }
+pre[class*="language-"] code { color: var(--text-primary); white-space: pre !important; }
+/*

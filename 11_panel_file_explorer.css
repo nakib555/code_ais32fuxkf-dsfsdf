@@ -1,0 +1,23 @@
+/* --- START OF FILE 11_panel_file_explorer.css --- */
+/* File Explorer */
+.file-explorer-wrapper {
+    width: var(--file-explorer-initial-width); min-width: 200px; max-width: 40%;
+    background-color: var(--bg-surface);
+    display: flex; flex-direction: column; flex-shrink: 0; flex-grow: 0; overflow: hidden;
+    border-right: 1px solid var(--border-color-strong);
+}
+.file-explorer { overflow-y: auto; padding: var(--spacing-unit); flex-grow: 1; } /* .panel-header is used for its header */
+#fileList { list-style-type: none; } #fileList ul { padding-left: var(--spacing-unit); }
+#fileList li {
+    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); cursor: pointer; font-size: 0.8125rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border-radius: var(--radius-sm); color: var(--text-secondary);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+#fileList li:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+#fileList li.selected { background-color: var(--accent-primary) !important; color: var(--text-on-accent) !important; font-weight: 500; }
+.file-explorer-item-content { display: flex; align-items: center; width: 100%; }
+.file-explorer-chevron { margin-right: calc(var(--spacing-unit)*0.5); width: 16px; display: inline-block; text-align: center; user-select: none; transition: transform 0.2s ease; }
+#fileList li[data-isdir="true"].open > .file-explorer-item-content > .file-explorer-chevron { transform: rotate(90deg); }
+.file-explorer-icon { margin-right: var(--spacing-unit); user-select: none; opacity: 0.7; }
+/*

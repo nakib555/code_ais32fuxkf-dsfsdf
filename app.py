@@ -1,4 +1,3 @@
-
 # --- START OF FILE app.py ---
 
 import os
@@ -12,6 +11,7 @@ import re
 import shutil
 import markdown # Import markdown
 from bs4 import BeautifulSoup # Import BeautifulSoup
+import json # Import json for PowerShell suggestions
 
 import tools # Import from our tools file
 
@@ -68,6 +68,18 @@ def _get_powershell_version_from_executable(executable_name):
 def initialize_powershell_environment():
     global CONFIGURED_PWSH_INVOCATION
     logger.info("Initializing PowerShell environment check...")
+    
+    # Try to use local PowerShell installation first
+    local_pwsh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "pwsh7.5", "pwsh.exe")
+    if os.path.exists(local_pwsh):
+        logger.info(f"Using local PowerShell 7.5 installation: {local_pwsh}")
+        CONFIGURED_PWSH_INVOCATION = [
+            local_pwsh, "-NoProfile", "-NonInteractive",
+            "-ExecutionPolicy", "Bypass", "-Command"
+        ]
+        return
+
+    # Fall back to system PowerShell
     pwsh_exe_name = "pwsh"
     current_version = _get_powershell_version_from_executable(pwsh_exe_name)
     if current_version and current_version >= MIN_PWSH_VERSION_TUPLE:
@@ -428,6 +440,82 @@ def render_ai_response_html(raw_text):
 # --- End AI Response Rendering Function ---
 
 
+# --- Enhanced PowerShell Integration ---
+def get_powershell_suggestions(partial_command):
+    """Get command suggestions for PowerShell autocompletion."""
+    if not CONFIGURED_PWSH_INVOCATION:
+        return []
+    
+    suggestion_script = f'''
+    $suggestions = @()
+    $commandText = "{partial_command}"
+    
+    # Get matching commands
+    $suggestions += Get-Command -Name "$commandText*" | 
+        Select-Object -First 5 | 
+        ForEach-Object {{ $_.Name }}
+    
+    # Get matching aliases
+    $suggestions += Get-Alias -Definition "$commandText*" -ErrorAction SilentlyContinue | 
+        Select-Object -First 3 | 
+        ForEach-Object {{ $_.Name }}
+    
+    $suggestions | ConvertTo-Json
+    '''
+    
+    try:
+        process = subprocess.run(
+            CONFIGURED_PWSH_INVOCATION + [suggestion_script],
+            capture_output=True,
+            text=True,
+            timeout=2
+        )
+        if process.returncode == 0 and process.stdout:
+            return json.loads(process.stdout)
+    except:
+        pass
+    return []
+
+def format_powershell_output(output):
+    """Format PowerShell output with syntax highlighting."""
+    # Add basic syntax highlighting classes
+    formatted = output
+    # Highlight cmdlets
+    formatted = re.sub(
+        r'\b(Get|Set|New|Remove|Start|Stop|Add|Clear|Copy|Move|Rename|Split|Join|ConvertTo|ConvertFrom|Import|Export|Test|Invoke|Update|Write|Read|Out|Enter|Exit)-\w+\b',
+        r'<span class="ps-command">\g<0></span>',
+        formatted
+    )
+    # Highlight parameters
+    formatted = re.sub(
+        r'(-\w+)',
+        r'<span class="ps-parameter">\g<0></span>',
+        formatted
+    )
+    # Highlight strings
+    formatted = re.sub(
+        r'"([^"]*)"',
+        r'<span class="ps-string">"\g<1>"</span>',
+        formatted
+    )
+    # Highlight variables
+    formatted = re.sub(
+        r'(\$\w+)',
+        r'<span class="ps-variable">\g<0></span>',
+        formatted
+    )
+    return formatted
+
+@app.route('/api/terminal/suggestions')
+def get_terminal_suggestions():
+    """API endpoint for PowerShell command suggestions."""
+    partial = request.args.get('partial', '')
+    suggestions = get_powershell_suggestions(partial)
+    return jsonify(suggestions)
+
+# --- End Enhanced PowerShell Integration ---
+
+
 if not os.path.exists(PROJECT_ROOT):
     try:
         os.makedirs(PROJECT_ROOT)
@@ -658,6 +746,68 @@ def run_command_api():
     if not command_str: return jsonify({'error': 'No command provided'}), 400
     execution_result = execute_backend_command(command_str)
     return jsonify(execution_result)
+
+# --- Search and File Lock Endpoints ---
+@app.route('/api/search-files')
+def search_files():
+    query = request.args.get('query', '').lower()
+    scope = request.args.get('scope', 'filename')
+    
+    if not query:
+        return jsonify([])
+
+    results = []
+    try:
+        for root, _, files in os.walk(PROJECT_ROOT):
+            for file in files:
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, PROJECT_ROOT)
+                
+                # Skip binary files and certain directories
+                if any(part.startswith('.') for part in relative_path.split(os.sep)):
+                    continue
+                    
+                if scope == 'filename':
+                    if query in file.lower():
+                        results.append({
+                            'path': relative_path.replace('\\', '/'),
+                            'name': file,
+                            'isDir': False
+                        })
+                else:  # content search
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            if query in content.lower():
+                                # Find the context around the match
+                                lines = content.split('\n')
+                                for i, line in enumerate(lines):
+                                    if query in line.lower():
+                                        start = max(0, i - 2)
+                                        end = min(len(lines), i + 3)
+                                        preview = '\n'.join(lines[start:end])
+                                        results.append({
+                                            'path': relative_path.replace('\\', '/'),
+                                            'name': file,
+                                            'isDir': False,
+                                            'preview': preview,
+                                            'line': i + 1
+                                        })
+                                        break
+                    except UnicodeDecodeError:
+                        # Skip binary files
+                        continue
+
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/file-locks')
+def get_file_locks():
+    # For now, return an empty list as we haven't implemented file locking yet
+    return jsonify([])
+
+# --- End Search and File Lock Endpoints ---
 
 if __name__ == '__main__':
     initialize_powershell_environment()

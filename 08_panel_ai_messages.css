@@ -1,0 +1,79 @@
+/* --- START OF FILE 08_panel_ai_messages.css --- */
+.message {
+    padding: var(--spacing-unit) calc(var(--spacing-unit)*1.5);
+    border-radius: var(--radius-lg);
+    max-width: 90%;
+    line-height: 1.5;
+    word-wrap: break-word;
+    font-size: 0.875rem;
+    position: relative;
+    padding-bottom: calc(var(--spacing-unit) * 3); /* Space for timestamp */
+}
+.message-timestamp {
+    position: absolute;
+    bottom: calc(var(--spacing-unit) * 0.75);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.user-message {
+    background-color: var(--accent-primary);
+    color: var(--text-on-accent);
+    margin-left: auto;
+    border-bottom-right-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    border-right: 3px solid var(--accent-primary-active);
+    padding-right: calc(var(--spacing-unit) * 1.5 + 3px);
+}
+.user-message .message-timestamp {
+    left: calc(var(--spacing-unit) * 1.5);
+    right: auto;
+}
+
+.ai-message {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    margin-right: auto;
+    border-bottom-left-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    border-left: 3px solid var(--accent-secondary);
+    /* Adjust padding for messages containing code blocks */
+    padding: var(--spacing-unit); /* Reset padding */
+    padding-left: calc(var(--spacing-unit) + 3px); /* Add border width to left padding */
+    padding-right: var(--spacing-unit);
+    padding-bottom: calc(var(--spacing-unit) * 2.5); /* Space for timestamp */
+}
+/* Specific padding adjustment for ai-message content */
+.ai-message > *:not(.ai-code-block-container):not(.ai-terminal-command-block):not(.message-timestamp) {
+    padding-left: calc(var(--spacing-unit) * 0.5); /* Add some left padding to text elements */
+    padding-right: calc(var(--spacing-unit) * 0.5); /* Add some right padding to text elements */
+}
+.ai-message > h1, .ai-message > h2, .ai-message > h3, .ai-message > h4, .ai-message > h5, .ai-message > h6,
+.ai-message > p, .ai-message > ul, .ai-message > ol, .ai-message > blockquote {
+     padding-left: calc(var(--spacing-unit) * 0.5);
+     padding-right: calc(var(--spacing-unit) * 0.5);
+}
+.ai-message .message-timestamp {
+    right: var(--spacing-unit); /* Adjust timestamp position */
+    left: auto;
+    bottom: var(--spacing-unit);
+}
+
+
+.ai-message.info, .ai-message.thinking, .ai-message.error {
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.8125rem;
+    text-align: center;
+    padding: var(--spacing-unit) 0; /* Reset padding as no timestamp needed */
+    border-left: 3px solid var(--text-secondary); /* Muted border */
+    padding-left: calc(var(--spacing-unit) * 1.5 + 3px);
+    padding-right: calc(var(--spacing-unit) * 1.5);
+}
+.ai-message.info.success { color: var(--accent-success); font-style: normal; border-left-color: var(--accent-success); }
+.ai-message.thinking { color: var(--text-secondary); font-style: italic; background-color: transparent; box-shadow: none; }
+.ai-message.error { background-color: var(--accent-error); color: var(--text-on-accent); box-shadow: var(--shadow-sm); border-left-color: var(--accent-error); font-style: normal; text-align: left; padding-left: calc(var(--spacing-unit) * 1.5); padding-right: calc(var(--spacing-unit) * 1.5);}
+/*
